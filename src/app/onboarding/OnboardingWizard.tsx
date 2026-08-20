@@ -67,13 +67,13 @@ export function OnboardingWizard() {
   }
 
   return (
-    <div className="panel cut-both p-6">
+    <div className="panel p-6">
       <p className="text-text-dim text-xs mb-4">
         Passo {passo + 1} de {TOTAL_PASSOS}
       </p>
 
       {error && (
-        <div className="bg-danger/10 border border-danger text-danger text-xs px-2.5 py-2 mb-3">
+        <div className="bg-danger/10 border border-danger text-danger text-xs px-2.5 py-2 mb-3 rounded-[10px]">
           {error}
         </div>
       )}
@@ -118,7 +118,7 @@ export function OnboardingWizard() {
                 step="0.1"
                 value={comissaoPadraoPct}
                 onChange={(e) => setComissaoPadraoPct(e.target.value)}
-                className="w-full bg-panel-2 border border-border text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
+                className="w-full bg-panel-2 border border-border rounded-[10px] text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
               />
             </div>
           )}
@@ -152,9 +152,9 @@ export function OnboardingWizard() {
                   setPeriodicidadeFechamento(opcao);
                   setDiaInicioPeriodo(1);
                 }}
-                className={`flex-1 border px-3 py-2 text-xs font-semibold capitalize transition-colors ${
+                className={`flex-1 rounded-[10px] border px-3 py-2 text-xs font-semibold capitalize transition-colors ${
                   periodicidadeFechamento === opcao
-                    ? "border-accent bg-accent/15 text-accent"
+                    ? "border-accent-border bg-accent-soft text-accent-label"
                     : "border-border bg-panel-2 text-text-dim"
                 }`}
               >
@@ -172,7 +172,7 @@ export function OnboardingWizard() {
                 max={31}
                 value={diaInicioPeriodo}
                 onChange={(e) => setDiaInicioPeriodo(Number(e.target.value))}
-                className="w-full bg-panel-2 border border-border text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
+                className="w-full bg-panel-2 border border-border rounded-[10px] text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
               />
             </div>
           ) : (
@@ -181,7 +181,7 @@ export function OnboardingWizard() {
               <select
                 value={diaInicioPeriodo}
                 onChange={(e) => setDiaInicioPeriodo(Number(e.target.value))}
-                className="w-full bg-panel-2 border border-border text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
+                className="w-full bg-panel-2 border border-border rounded-[10px] text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
               >
                 {DIAS_SEMANA.map((d) => (
                   <option key={d.valor} value={d.valor}>
@@ -199,7 +199,7 @@ export function OnboardingWizard() {
           type="button"
           onClick={voltar}
           disabled={passo === 0 || pending}
-          className="border border-border bg-panel-2 text-text text-xs font-semibold px-3.5 py-2 disabled:opacity-30 hover:border-accent hover:text-accent transition-colors"
+          className="rounded-[10px] border border-border bg-panel-2 text-text text-xs font-semibold px-3.5 py-2 disabled:opacity-30 hover:border-accent hover:text-accent-label transition-colors"
         >
           Voltar
         </button>
@@ -207,7 +207,7 @@ export function OnboardingWizard() {
           type="button"
           onClick={proximo}
           disabled={pending}
-          className="btn-primary cut-tr"
+          className="btn-primary"
         >
           {pending ? "Salvando..." : passo === TOTAL_PASSOS - 1 ? "Concluir" : "Próximo"}
         </button>

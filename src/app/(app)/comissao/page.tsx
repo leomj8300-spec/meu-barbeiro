@@ -42,7 +42,7 @@ export default async function ComissaoPage() {
           <div key={c.barbeiroId} className="panel-accent p-4">
             <div className="flex items-center justify-between gap-2 mb-1">
               <span className="text-[14px] font-semibold">{c.nome}</span>
-              <span className="bg-accent/15 text-accent text-[10.5px] font-bold px-1.5 py-0.5">
+              <span className="rounded-[10px] bg-accent-soft text-accent-label text-[10.5px] font-bold px-1.5 py-0.5">
                 {c.comissaoPct}%
               </span>
             </div>
@@ -50,7 +50,7 @@ export default async function ComissaoPage() {
               {c.qtdAtendimentos} atendimento{c.qtdAtendimentos !== 1 ? "s" : ""} · base comissionável{" "}
               {fmt(c.baseComissionavel)}
             </p>
-            <p className="font-mono text-2xl font-bold text-accent">{fmt(c.valorComissao)}</p>
+            <p className="font-mono text-2xl font-bold text-accent-label">{fmt(c.valorComissao)}</p>
           </div>
         ))}
       </div>

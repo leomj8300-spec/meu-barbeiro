@@ -44,35 +44,35 @@ export function FechamentoView({
   return (
     <div className="flex flex-col gap-5">
       {error && (
-        <div className="bg-danger/10 border border-danger text-danger text-xs px-2.5 py-2">
+        <div className="bg-danger/10 border border-danger text-danger text-xs px-2.5 py-2 rounded-[10px]">
           {error}
         </div>
       )}
 
-      <div className="bg-panel border border-accent-dim border-l-4 border-l-accent p-4">
-        <p className="text-[11px] uppercase tracking-wide text-text-dim mb-1">
+      <div className="panel-accent p-4">
+        <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-text-dim mb-1">
           Período atual · desde {fmtData(periodoAtual.inicio)}
         </p>
-        <p className="font-mono text-3xl font-bold text-accent mb-3">{fmt(totais.faturamentoTotal)}</p>
+        <p className="font-mono text-3xl font-bold text-accent-label mb-3">{fmt(totais.faturamentoTotal)}</p>
 
         <div className="grid grid-cols-2 gap-2 text-[12.5px]">
-          <div className="bg-panel-2 border border-border px-2.5 py-2">
-            <p className="text-text-dim text-[10.5px] uppercase">Atendimentos</p>
+          <div className="rounded-[10px] bg-panel-2 border border-border px-2.5 py-2">
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-text-dim">Atendimentos</p>
             <p className="font-mono font-bold">{totais.qtdAtendimentos}</p>
           </div>
-          <div className="bg-panel-2 border border-border px-2.5 py-2">
-            <p className="text-text-dim text-[10.5px] uppercase">Fiado pendente</p>
+          <div className="rounded-[10px] bg-panel-2 border border-border px-2.5 py-2">
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-text-dim">Fiado pendente</p>
             <p className="font-mono font-bold text-warn">{fmt(totais.fiadoPendente)}</p>
           </div>
           {comissaoHabilitada && (
-            <div className="bg-panel-2 border border-border px-2.5 py-2">
-              <p className="text-text-dim text-[10.5px] uppercase">Comissão</p>
+            <div className="rounded-[10px] bg-panel-2 border border-border px-2.5 py-2">
+              <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-text-dim">Comissão</p>
               <p className="font-mono font-bold">{fmt(totais.comissaoTotal)}</p>
             </div>
           )}
           {caixinhaHabilitada && (
-            <div className="bg-panel-2 border border-border px-2.5 py-2">
-              <p className="text-text-dim text-[10.5px] uppercase">Caixinha</p>
+            <div className="rounded-[10px] bg-panel-2 border border-border px-2.5 py-2">
+              <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-text-dim">Caixinha</p>
               <p className="font-mono font-bold">{fmt(totais.caixinhaTotal)}</p>
             </div>
           )}
@@ -82,25 +82,27 @@ export function FechamentoView({
           type="button"
           onClick={fechar}
           disabled={pending}
-          className="btn-primary cut-tr w-full mt-4 py-3"
+          className="btn-primary w-full mt-4 py-3"
         >
           {pending ? "Fechando..." : "Fechar período atual"}
         </button>
       </div>
 
       <div className="panel p-4">
-        <p className="text-xs uppercase tracking-wide text-text-dim mb-2.5">Histórico de fechamentos</p>
+        <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-text-dim font-semibold mb-2.5">
+          Histórico de fechamentos
+        </p>
         {historico.length === 0 && (
           <p className="text-text-dim text-xs">Nenhum fechamento registrado ainda.</p>
         )}
         <div className="flex flex-col gap-1.5">
           {historico.map((f) => (
-            <div key={f.id} className="bg-panel-2 border border-border px-2.5 py-2">
+            <div key={f.id} className="rounded-[10px] bg-panel-2 border border-border px-2.5 py-2">
               <div className="flex items-center justify-between">
                 <span className="text-[11.5px] text-text-dim">
                   {fmtData(f.semanaInicio)} — {fmtData(f.semanaFim)}
                 </span>
-                <span className="font-mono text-sm font-bold text-accent">
+                <span className="font-mono text-sm font-bold text-accent-label">
                   {fmt(f.totais.faturamentoTotal)}
                 </span>
               </div>

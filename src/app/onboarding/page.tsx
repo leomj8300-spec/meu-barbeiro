@@ -21,7 +21,7 @@ export default async function OnboardingPage() {
     <div className="min-h-dvh flex items-center justify-center p-4 sm:p-6">
       <div className="w-full max-w-[440px]">
         <div className="flex items-center gap-3 mb-6">
-          <span className="brand-mark cut-tr w-11 h-11">
+          <span className="w-11 h-11 rounded-[10px] bg-accent text-on-accent flex items-center justify-center shrink-0">
             <IconRazor className="w-6 h-6" />
           </span>
           <div>
@@ -29,7 +29,6 @@ export default async function OnboardingPage() {
             <p className="text-text-dim text-xs mt-1">Leva menos de um minuto.</p>
           </div>
         </div>
-        <div className="barber-stripe mb-6" />
         <OnboardingWizard />
       </div>
     </div>

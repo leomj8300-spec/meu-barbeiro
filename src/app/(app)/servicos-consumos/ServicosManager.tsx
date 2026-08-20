@@ -55,10 +55,12 @@ export function ServicosManager({ servicos }: { servicos: Servico[] }) {
 
   return (
     <section className="panel p-4">
-      <h2 className="text-xs uppercase tracking-wide text-text-dim mb-3.5">Serviços</h2>
+      <h2 className="font-mono text-[10px] uppercase tracking-[0.14em] text-text-dim font-semibold mb-3.5">
+        Serviços
+      </h2>
 
       {error && (
-        <div className="bg-danger/10 border border-danger text-danger text-xs px-2.5 py-2 mb-3">
+        <div className="bg-danger/10 border border-danger text-danger text-xs px-2.5 py-2 mb-3 rounded-[10px]">
           {error}
         </div>
       )}
@@ -79,12 +81,12 @@ export function ServicosManager({ servicos }: { servicos: Servico[] }) {
           ) : (
             <div
               key={s.id}
-              className="flex items-center justify-between gap-2 border border-border bg-panel-2 px-2.5 py-2"
+              className="flex items-center justify-between gap-2 rounded-[10px] border border-border bg-panel-2 px-2.5 py-2"
             >
               <div className="min-w-0">
                 <span className="text-[13.5px] font-semibold">{s.nome}</span>
                 {s.comissionavel && (
-                  <span className="ml-2 inline-block bg-serv/15 text-serv text-[10px] font-bold uppercase px-1.5 py-0.5 align-middle">
+                  <span className="ml-2 inline-block rounded-[10px] bg-serv/15 text-serv text-[10px] font-bold uppercase px-1.5 py-0.5 align-middle">
                     comissionável
                   </span>
                 )}
@@ -94,14 +96,14 @@ export function ServicosManager({ servicos }: { servicos: Servico[] }) {
                 <button
                   type="button"
                   onClick={() => setEditandoId(s.id)}
-                  className="border border-border bg-panel text-text-dim text-[11px] font-semibold px-2 py-1 hover:border-accent hover:text-accent"
+                  className="rounded-[10px] border border-border bg-panel text-text-dim text-[11px] font-semibold px-2 py-1 hover:border-accent hover:text-accent-label"
                 >
                   Editar
                 </button>
                 <button
                   type="button"
                   onClick={() => excluir(s.id)}
-                  className="border border-border bg-panel text-text-dim text-[11px] font-semibold px-2 py-1 hover:border-danger hover:text-danger"
+                  className="rounded-[10px] border border-border bg-panel text-text-dim text-[11px] font-semibold px-2 py-1 hover:border-danger hover:text-danger"
                 >
                   Excluir
                 </button>
@@ -119,7 +121,7 @@ export function ServicosManager({ servicos }: { servicos: Servico[] }) {
             placeholder="Nome"
             value={novoNome}
             onChange={(e) => setNovoNome(e.target.value)}
-            className="flex-1 bg-panel-2 border border-border text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
+            className="flex-1 bg-panel-2 border border-border rounded-[10px] text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
           />
           <input
             type="number"
@@ -128,7 +130,7 @@ export function ServicosManager({ servicos }: { servicos: Servico[] }) {
             placeholder="Preço"
             value={novoPreco}
             onChange={(e) => setNovoPreco(e.target.value)}
-            className="w-full sm:w-28 bg-panel-2 border border-border text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
+            className="w-full sm:w-28 bg-panel-2 border border-border rounded-[10px] text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
           />
           <label className="flex items-center gap-1.5 text-xs text-text-dim shrink-0 cursor-pointer">
             <input
@@ -143,7 +145,7 @@ export function ServicosManager({ servicos }: { servicos: Servico[] }) {
             type="button"
             onClick={adicionar}
             disabled={pending}
-            className="btn-primary cut-tr shrink-0"
+            className="btn-primary shrink-0"
           >
             Adicionar
           </button>
@@ -189,13 +191,13 @@ function ServicoEditForm({
   }
 
   return (
-    <div className="border border-accent-dim bg-panel-2 px-2.5 py-2.5">
+    <div className="rounded-[10px] border border-accent-border bg-panel-2 px-2.5 py-2.5">
       <div className="flex flex-col sm:flex-row gap-2 mb-2">
         <input
           type="text"
           value={nome}
           onChange={(e) => setNome(e.target.value)}
-          className="flex-1 bg-panel border border-border text-text px-2.5 py-1.5 text-[13.5px] focus:outline-none focus:border-accent"
+          className="flex-1 bg-panel border border-border rounded-[10px] text-text px-2.5 py-1.5 text-[13.5px] focus:outline-none focus:border-accent"
         />
         <input
           type="number"
@@ -203,7 +205,7 @@ function ServicoEditForm({
           min="0"
           value={preco}
           onChange={(e) => setPreco(e.target.value)}
-          className="w-full sm:w-28 bg-panel border border-border text-text px-2.5 py-1.5 text-[13.5px] focus:outline-none focus:border-accent"
+          className="w-full sm:w-28 bg-panel border border-border rounded-[10px] text-text px-2.5 py-1.5 text-[13.5px] focus:outline-none focus:border-accent"
         />
       </div>
       <div className="flex items-center justify-between gap-2">
@@ -220,7 +222,7 @@ function ServicoEditForm({
           <button
             type="button"
             onClick={onCancel}
-            className="border border-border bg-panel text-text-dim text-[11px] font-semibold px-2 py-1 hover:text-text"
+            className="rounded-[10px] border border-border bg-panel text-text-dim text-[11px] font-semibold px-2 py-1 hover:text-text"
           >
             Cancelar
           </button>
@@ -228,7 +230,7 @@ function ServicoEditForm({
             type="button"
             onClick={salvar}
             disabled={pending}
-            className="border border-accent bg-accent/15 text-accent text-[11px] font-semibold px-2 py-1 disabled:opacity-40"
+            className="rounded-[10px] border border-accent-border bg-accent-soft text-accent-label text-[11px] font-semibold px-2 py-1 disabled:opacity-40"
           >
             {pending ? "Salvando..." : "Salvar"}
           </button>

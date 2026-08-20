@@ -62,14 +62,14 @@ export function CaixinhaView({
   return (
     <div className="flex flex-col gap-5">
       {error && (
-        <div className="bg-danger/10 border border-danger text-danger text-xs px-2.5 py-2">
+        <div className="bg-danger/10 border border-danger text-danger text-xs px-2.5 py-2 rounded-[10px]">
           {error}
         </div>
       )}
 
       <div className="panel p-5 text-center">
-        <p className="text-[11px] uppercase tracking-wide text-text-dim">Minha caixinha</p>
-        <p className="font-mono text-3xl font-bold text-accent mt-1">{fmt(minha.total)}</p>
+        <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-text-dim">Minha caixinha</p>
+        <p className="font-mono text-3xl font-bold text-accent-label mt-1">{fmt(minha.total)}</p>
       </div>
 
       <div className="panel p-4">
@@ -82,13 +82,13 @@ export function CaixinhaView({
             placeholder="Valor"
             value={valor}
             onChange={(e) => setValor(e.target.value)}
-            className="flex-1 bg-panel-2 border border-border text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
+            className="flex-1 bg-panel-2 border border-border rounded-[10px] text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
           />
           <button
             type="button"
             onClick={adicionar}
             disabled={pending}
-            className="btn-primary cut-tr shrink-0"
+            className="btn-primary shrink-0"
           >
             Adicionar
           </button>
@@ -97,15 +97,17 @@ export function CaixinhaView({
 
       {minha.entradas.length > 0 && (
         <div className="panel p-4">
-          <p className="text-xs uppercase tracking-wide text-text-dim mb-2.5">Histórico</p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-text-dim font-semibold mb-2.5">
+            Histórico
+          </p>
           <div className="flex flex-col gap-1.5 max-h-64 overflow-y-auto">
             {minha.entradas.map((e) => (
               <div
                 key={e.id}
-                className="flex items-center justify-between bg-panel-2 border border-border px-2.5 py-1.5"
+                className="flex items-center justify-between rounded-[10px] bg-panel-2 border border-border px-2.5 py-1.5"
               >
                 <span className="text-[11.5px] text-text-dim">{fmtData(e.criadoEm)}</span>
-                <span className="font-mono text-xs font-bold text-accent">{fmt(e.valor)}</span>
+                <span className="font-mono text-xs font-bold text-accent-label">{fmt(e.valor)}</span>
               </div>
             ))}
           </div>
@@ -122,7 +124,9 @@ export function CaixinhaView({
 
       {geral && (
         <div className="panel p-4">
-          <p className="text-xs uppercase tracking-wide text-text-dim mb-1">Caixinha da equipe</p>
+          <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-text-dim font-semibold mb-1">
+            Caixinha da equipe
+          </p>
           <p className="font-mono text-xl font-bold mb-3">{fmt(geral.total)}</p>
 
           <div className="flex flex-col gap-1.5">
@@ -132,10 +136,10 @@ export function CaixinhaView({
             {geral.porBarbeiro.map((b) => (
               <div
                 key={b.barbeiroId}
-                className="flex items-center justify-between bg-panel-2 border border-border px-2.5 py-2"
+                className="flex items-center justify-between rounded-[10px] bg-panel-2 border border-border px-2.5 py-2"
               >
                 <span className="text-[13px] font-semibold">{b.nome}</span>
-                <span className="font-mono text-xs font-bold text-accent">{fmt(b.total)}</span>
+                <span className="font-mono text-xs font-bold text-accent-label">{fmt(b.total)}</span>
               </div>
             ))}
           </div>

@@ -56,10 +56,12 @@ export function ConsumosManager({ consumos }: { consumos: Consumo[] }) {
 
   return (
     <section className="panel p-4">
-      <h2 className="text-xs uppercase tracking-wide text-text-dim mb-3.5">Consumos e estoque</h2>
+      <h2 className="font-mono text-[10px] uppercase tracking-[0.14em] text-text-dim font-semibold mb-3.5">
+        Consumos e estoque
+      </h2>
 
       {error && (
-        <div className="bg-danger/10 border border-danger text-danger text-xs px-2.5 py-2 mb-3">
+        <div className="bg-danger/10 border border-danger text-danger text-xs px-2.5 py-2 mb-3 rounded-[10px]">
           {error}
         </div>
       )}
@@ -97,7 +99,7 @@ export function ConsumosManager({ consumos }: { consumos: Consumo[] }) {
             placeholder="Nome"
             value={novoNome}
             onChange={(e) => setNovoNome(e.target.value)}
-            className="flex-1 bg-panel-2 border border-border text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
+            className="flex-1 bg-panel-2 border border-border rounded-[10px] text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
           />
           <input
             type="number"
@@ -106,7 +108,7 @@ export function ConsumosManager({ consumos }: { consumos: Consumo[] }) {
             placeholder="Preço"
             value={novoPreco}
             onChange={(e) => setNovoPreco(e.target.value)}
-            className="w-full sm:w-24 bg-panel-2 border border-border text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
+            className="w-full sm:w-24 bg-panel-2 border border-border rounded-[10px] text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
           />
           <input
             type="number"
@@ -115,13 +117,13 @@ export function ConsumosManager({ consumos }: { consumos: Consumo[] }) {
             placeholder="Estoque inicial"
             value={novoEstoque}
             onChange={(e) => setNovoEstoque(e.target.value)}
-            className="w-full sm:w-32 bg-panel-2 border border-border text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
+            className="w-full sm:w-32 bg-panel-2 border border-border rounded-[10px] text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
           />
           <button
             type="button"
             onClick={adicionar}
             disabled={pending}
-            className="btn-primary cut-tr shrink-0"
+            className="btn-primary shrink-0"
           >
             Adicionar
           </button>
@@ -160,7 +162,7 @@ function ConsumoRow({
   }
 
   return (
-    <div className="border border-border bg-panel-2 px-2.5 py-2">
+    <div className="rounded-[10px] border border-border bg-panel-2 px-2.5 py-2">
       <div className="flex items-center justify-between gap-2 mb-2">
         <div className="min-w-0">
           <span className="text-[13.5px] font-semibold">{consumo.nome}</span>
@@ -173,14 +175,14 @@ function ConsumoRow({
           <button
             type="button"
             onClick={onEditar}
-            className="border border-border bg-panel text-text-dim text-[11px] font-semibold px-2 py-1 hover:border-accent hover:text-accent"
+            className="rounded-[10px] border border-border bg-panel text-text-dim text-[11px] font-semibold px-2 py-1 hover:border-accent hover:text-accent-label"
           >
             Editar
           </button>
           <button
             type="button"
             onClick={onExcluir}
-            className="border border-border bg-panel text-text-dim text-[11px] font-semibold px-2 py-1 hover:border-danger hover:text-danger"
+            className="rounded-[10px] border border-border bg-panel text-text-dim text-[11px] font-semibold px-2 py-1 hover:border-danger hover:text-danger"
           >
             Excluir
           </button>
@@ -194,13 +196,13 @@ function ConsumoRow({
           step="1"
           value={ajuste}
           onChange={(e) => setAjuste(e.target.value)}
-          className="w-16 bg-panel border border-border text-text px-2 py-1 text-xs focus:outline-none focus:border-accent"
+          className="w-16 bg-panel border border-border rounded-[10px] text-text px-2 py-1 text-xs focus:outline-none focus:border-accent"
         />
         <button
           type="button"
           onClick={() => aplicarAjuste(1)}
           disabled={pending}
-          className="border border-cons/50 bg-cons/10 text-cons text-[11px] font-semibold px-2 py-1 disabled:opacity-40"
+          className="rounded-[10px] border border-cons/50 bg-cons/10 text-cons text-[11px] font-semibold px-2 py-1 disabled:opacity-40"
         >
           + Repor
         </button>
@@ -208,7 +210,7 @@ function ConsumoRow({
           type="button"
           onClick={() => aplicarAjuste(-1)}
           disabled={pending}
-          className="border border-warn/50 bg-warn/10 text-warn text-[11px] font-semibold px-2 py-1 disabled:opacity-40"
+          className="rounded-[10px] border border-warn/50 bg-warn/10 text-warn text-[11px] font-semibold px-2 py-1 disabled:opacity-40"
         >
           − Baixa
         </button>
@@ -247,13 +249,13 @@ function ConsumoEditForm({
   }
 
   return (
-    <div className="border border-accent-dim bg-panel-2 px-2.5 py-2.5">
+    <div className="rounded-[10px] border border-accent-border bg-panel-2 px-2.5 py-2.5">
       <div className="flex flex-col sm:flex-row gap-2 mb-2">
         <input
           type="text"
           value={nome}
           onChange={(e) => setNome(e.target.value)}
-          className="flex-1 bg-panel border border-border text-text px-2.5 py-1.5 text-[13.5px] focus:outline-none focus:border-accent"
+          className="flex-1 bg-panel border border-border rounded-[10px] text-text px-2.5 py-1.5 text-[13.5px] focus:outline-none focus:border-accent"
         />
         <input
           type="number"
@@ -261,7 +263,7 @@ function ConsumoEditForm({
           min="0"
           value={preco}
           onChange={(e) => setPreco(e.target.value)}
-          className="w-full sm:w-28 bg-panel border border-border text-text px-2.5 py-1.5 text-[13.5px] focus:outline-none focus:border-accent"
+          className="w-full sm:w-28 bg-panel border border-border rounded-[10px] text-text px-2.5 py-1.5 text-[13.5px] focus:outline-none focus:border-accent"
         />
       </div>
       <p className="text-[11px] text-text-dim mb-2">
@@ -271,7 +273,7 @@ function ConsumoEditForm({
         <button
           type="button"
           onClick={onCancel}
-          className="border border-border bg-panel text-text-dim text-[11px] font-semibold px-2 py-1 hover:text-text"
+          className="rounded-[10px] border border-border bg-panel text-text-dim text-[11px] font-semibold px-2 py-1 hover:text-text"
         >
           Cancelar
         </button>
@@ -279,7 +281,7 @@ function ConsumoEditForm({
           type="button"
           onClick={salvar}
           disabled={pending}
-          className="border border-accent bg-accent/15 text-accent text-[11px] font-semibold px-2 py-1 disabled:opacity-40"
+          className="rounded-[10px] border border-accent-border bg-accent-soft text-accent-label text-[11px] font-semibold px-2 py-1 disabled:opacity-40"
         >
           {pending ? "Salvando..." : "Salvar"}
         </button>

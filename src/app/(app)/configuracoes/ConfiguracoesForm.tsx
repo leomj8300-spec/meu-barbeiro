@@ -58,18 +58,20 @@ export function ConfiguracoesForm({ configuracoes }: { configuracoes: BarbeariaC
   return (
     <div className="flex flex-col gap-4">
       {error && (
-        <div className="bg-danger/10 border border-danger text-danger text-xs px-2.5 py-2">
+        <div className="bg-danger/10 border border-danger text-danger text-xs px-2.5 py-2 rounded-[10px]">
           {error}
         </div>
       )}
       {sucesso && (
-        <div className="bg-cons/10 border border-cons text-cons text-xs px-2.5 py-2">
+        <div className="bg-cons/10 border border-cons text-cons text-xs px-2.5 py-2 rounded-[10px]">
           Configurações salvas.
         </div>
       )}
 
       <section className="panel p-4">
-        <h2 className="text-xs uppercase tracking-wide text-text-dim mb-3">Operação</h2>
+        <h2 className="font-mono text-[10px] uppercase tracking-[0.14em] text-text-dim font-semibold mb-3">
+          Operação
+        </h2>
         <div className="flex flex-col gap-2">
           <ToggleField
             label="Controle de estoque e consumos"
@@ -99,7 +101,9 @@ export function ConfiguracoesForm({ configuracoes }: { configuracoes: BarbeariaC
       </section>
 
       <section className="panel p-4">
-        <h2 className="text-xs uppercase tracking-wide text-text-dim mb-3">Comissão</h2>
+        <h2 className="font-mono text-[10px] uppercase tracking-[0.14em] text-text-dim font-semibold mb-3">
+          Comissão
+        </h2>
         <ToggleField
           label="Comissão por serviço"
           hint="Incide só sobre serviços comissionáveis, nunca sobre consumos."
@@ -116,14 +120,16 @@ export function ConfiguracoesForm({ configuracoes }: { configuracoes: BarbeariaC
               step="0.1"
               value={comissaoPadraoPct}
               onChange={(e) => setComissaoPadraoPct(e.target.value)}
-              className="w-full bg-panel-2 border border-border text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
+              className="w-full bg-panel-2 border border-border rounded-[10px] text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
             />
           </div>
         )}
       </section>
 
       <section className="panel p-4">
-        <h2 className="text-xs uppercase tracking-wide text-text-dim mb-3">Fechamento de faturamento</h2>
+        <h2 className="font-mono text-[10px] uppercase tracking-[0.14em] text-text-dim font-semibold mb-3">
+          Fechamento de faturamento
+        </h2>
         <div className="flex gap-1.5 mb-3">
           {(["semanal", "quinzenal", "mensal"] as const).map((opcao) => (
             <button
@@ -133,9 +139,9 @@ export function ConfiguracoesForm({ configuracoes }: { configuracoes: BarbeariaC
                 setPeriodicidadeFechamento(opcao);
                 setDiaInicioPeriodo(1);
               }}
-              className={`flex-1 border px-3 py-2 text-xs font-semibold capitalize transition-colors ${
+              className={`flex-1 rounded-[10px] border px-3 py-2 text-xs font-semibold capitalize transition-colors ${
                 periodicidadeFechamento === opcao
-                  ? "border-accent bg-accent/15 text-accent"
+                  ? "border-accent-border bg-accent-soft text-accent-label"
                   : "border-border bg-panel-2 text-text-dim"
               }`}
             >
@@ -153,7 +159,7 @@ export function ConfiguracoesForm({ configuracoes }: { configuracoes: BarbeariaC
               max={31}
               value={diaInicioPeriodo}
               onChange={(e) => setDiaInicioPeriodo(Number(e.target.value))}
-              className="w-full bg-panel-2 border border-border text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
+              className="w-full bg-panel-2 border border-border rounded-[10px] text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
             />
           </div>
         ) : (
@@ -162,7 +168,7 @@ export function ConfiguracoesForm({ configuracoes }: { configuracoes: BarbeariaC
             <select
               value={diaInicioPeriodo}
               onChange={(e) => setDiaInicioPeriodo(Number(e.target.value))}
-              className="w-full bg-panel-2 border border-border text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
+              className="w-full bg-panel-2 border border-border rounded-[10px] text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
             >
               {DIAS_SEMANA.map((d) => (
                 <option key={d.valor} value={d.valor}>
@@ -178,7 +184,7 @@ export function ConfiguracoesForm({ configuracoes }: { configuracoes: BarbeariaC
         type="button"
         onClick={salvar}
         disabled={pending}
-        className="btn-primary cut-tr w-full py-3"
+        className="btn-primary w-full py-3"
       >
         {pending ? "Salvando..." : "Salvar configurações"}
       </button>
