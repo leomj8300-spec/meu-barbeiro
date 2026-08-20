@@ -1,0 +1,257 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   Paleta — preto/branco quente (documento "Exploração Visual — Barbearia").
+   Claro é o modo padrão; escuro entra via [data-theme-mode="escuro"] (escolha
+   explícita do usuário) ou via prefers-color-scheme quando o modo é
+   "sistema" — sem JS, o navegador já reavalia sozinho se o SO mudar.
+   Accent (6 tokens) é resolvido no servidor a partir de tema_cor do usuário
+   logado e injetado inline pelo layout raiz; os valores abaixo em :root são
+   só o fallback (tema "neutro") pra antes disso existir/pra visitante.
+   ========================================================================== */
+
+:root {
+  /* -- claro (padrão) -- */
+  --color-bg: #FAFAF8;
+  --color-panel: #FFFFFF;
+  --color-panel-2: #F2F1EE;
+  --color-border: #E2E0DB;
+  --color-text: #111111;
+  --color-text-dim: #57544E;
+
+  /* Superfície estrutural sempre quase-preta (barra de total, cabeçalho de
+     login) — independe do modo claro/escuro escolhido. */
+  --color-ink: #0E0E0E;
+  --color-ink-text: #FAFAF8;
+  --color-ink-text-dim: #8A867E;
+
+  /* Accent — fallback "neutro", sobrescrito inline por tema.ts no layout raiz. */
+  --color-accent: #111111;
+  --color-on-accent: #FAFAF8;
+  --color-accent-text: #FAFAF8;
+  --color-accent-on-light: #111111;
+  --color-accent-soft-light: #F1EFEA;
+  --color-accent-border-light: #111111;
+
+  /* Consumo semântico: qual dos dois tons de accent-text usar no modo atual. */
+  --color-accent-label: var(--color-accent-on-light);
+  --color-accent-soft: var(--color-accent-soft-light);
+  --color-accent-border: var(--color-accent-border-light);
+
+  /* Tags de item (serviço/consumo) — cor própria, não ligada ao accent do usuário. */
+  --color-serv: #8C6A1E;
+  --color-cons: #3F7A32;
+  --color-danger: #C6362B;
+  --color-warn: #A9700B;
+}
+
+:root[data-theme-mode="escuro"] {
+  --color-bg: #0E0E0E;
+  --color-panel: #1C1B19;
+  --color-panel-2: #201F1C;
+  --color-border: #33312D;
+  --color-text: #FAFAF8;
+  --color-text-dim: #8A867E;
+
+  --color-accent-label: var(--color-accent-text);
+  --color-accent-soft: color-mix(in srgb, var(--color-accent) 16%, var(--color-panel));
+  --color-accent-border: color-mix(in srgb, var(--color-accent) 40%, var(--color-panel));
+
+  --color-serv: #C99A3A;
+  --color-cons: #7FA66B;
+  --color-danger: #E5534B;
+  --color-warn: #E0A83E;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme-mode="sistema"] {
+    --color-bg: #0E0E0E;
+    --color-panel: #1C1B19;
+    --color-panel-2: #201F1C;
+    --color-border: #33312D;
+    --color-text: #FAFAF8;
+    --color-text-dim: #8A867E;
+
+    --color-accent-label: var(--color-accent-text);
+    --color-accent-soft: color-mix(in srgb, var(--color-accent) 16%, var(--color-panel));
+    --color-accent-border: color-mix(in srgb, var(--color-accent) 40%, var(--color-panel));
+
+    --color-serv: #C99A3A;
+    --color-cons: #7FA66B;
+    --color-danger: #E5534B;
+    --color-warn: #E0A83E;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--color-bg);
+  --color-panel: var(--color-panel);
+  --color-panel-2: var(--color-panel-2);
+  --color-border: var(--color-border);
+  --color-text: var(--color-text);
+  --color-text-dim: var(--color-text-dim);
+
+  --color-ink: var(--color-ink);
+  --color-ink-text: var(--color-ink-text);
+  --color-ink-text-dim: var(--color-ink-text-dim);
+
+  --color-accent: var(--color-accent);
+  --color-on-accent: var(--color-on-accent);
+  --color-accent-label: var(--color-accent-label);
+  --color-accent-ink-label: var(--color-accent-text);
+  --color-accent-soft: var(--color-accent-soft);
+  --color-accent-border: var(--color-accent-border);
+  /* mantido pra código antigo (ver AGENTS.md/histórico) que ainda lê --color-accent-dim */
+  --color-accent-dim: var(--color-accent-border);
+
+  --color-serv: var(--color-serv);
+  --color-cons: var(--color-cons);
+  --color-danger: var(--color-danger);
+  --color-warn: var(--color-warn);
+
+  --font-sans: var(--font-archivo);
+  --font-mono: var(--font-ibm-plex-mono);
+}
+
+html {
+  background: var(--color-bg);
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* ---------- Identidade Senas Barber (legado — telas ainda não migradas) ---------- */
+
+/* Faixa diagonal tipo poste de barbearia — usar 1x por tela, nunca decorar tudo. */
+.barber-stripe {
+  height: 5px;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--color-accent) 0 10px,
+    transparent 10px 20px
+  );
+  opacity: 0.9;
+}
+
+/* Corte diagonal no canto — não combinar com radius (a caixa inteira é clipada). */
+.cut-tr {
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%);
+}
+.cut-bl {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+}
+.cut-both {
+  clip-path: polygon(
+    0 0,
+    calc(100% - 12px) 0,
+    100% 12px,
+    100% 100%,
+    12px 100%,
+    0 calc(100% - 12px)
+  );
+}
+
+@layer components {
+  /* Painel: cards com radius 12px (regra do documento novo). */
+  .panel {
+    background: var(--color-panel);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+  }
+  .panel-accent {
+    background: var(--color-panel);
+    border: 1px solid var(--color-border);
+    border-left: 3px solid var(--color-accent);
+    border-radius: 12px;
+  }
+
+  /* Bloco estrutural preto (barra de total, resumo) — sempre escuro, nas duas telas. */
+  .panel-ink {
+    background: var(--color-ink);
+    color: var(--color-ink-text);
+    border-radius: 12px;
+  }
+
+  /* Botões/campos: radius 10px. */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: -0.01em;
+    padding: 0.75rem 1.1rem;
+    border-radius: 10px;
+    transition: opacity 0.15s;
+  }
+  .btn-primary:hover {
+    opacity: 0.88;
+  }
+  .btn-primary:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    background: var(--color-panel-2);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    font-weight: 600;
+    font-size: 0.75rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: 10px;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .btn-ghost:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  /* Chip: pill (radius 999px) — estado/seleção, nunca estrutura. */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 0.5rem 0.9rem;
+    border-radius: 999px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .chip-on {
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+  .chip-off {
+    background: var(--color-panel);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-dim);
+  }
+
+  .brand-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    padding: 0.3rem 0.65rem;
+  }
+
+  .heading-display {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+  }
+}

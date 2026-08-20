@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\nodejs;\" + $env:PATH; cd \"C:\\\\Users\\\\leonardo\\\\Desktop\\\\projeto barber\"; node \"node_modules\\\\.bin\\\\eslint\" . 2>&1 | Select-Object -First 250)",
+      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\nodejs;\" + $env:PATH; cd \"C:\\\\Users\\\\leonardo\\\\Desktop\\\\projeto barber\"; node \"node_modules\\\\eslint\\\\bin\\\\eslint.js\" . 2>&1 | Select-Object -First 250)",
+      "Bash(netstat -ano)",
+      "Bash(tasklist //FI \"IMAGENAME eq node.exe\")",
+      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\nodejs;\" + $env:PATH; node \"C:\\\\Users\\\\leonardo\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\C--Users-leonardo-Desktop-projeto-barber\\\\a312a444-4a6f-40a5-883b-0c6460296a6d\\\\scratchpad\\\\check_col.mjs\")",
+      "Bash(which supabase *)",
+      "Bash(node -e \"console.log\\(1\\)\")",
+      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\nodejs;\" + $env:PATH; cd \"C:\\\\Users\\\\leonardo\\\\Desktop\\\\projeto barber\"; node \"seed-teste.mjs\")",
+      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\nodejs;\" + $env:PATH; cd \"C:\\\\Users\\\\leonardo\\\\Desktop\\\\projeto barber\"; node \"node_modules\\\\typescript\\\\bin\\\\tsc\" --noEmit 2>&1 | Select-Object -First 200)",
+      "PowerShell($env:PATH = \"C:\\\\Program Files\\\\nodejs;\" + $env:PATH; cd \"C:\\\\Users\\\\leonardo\\\\Desktop\\\\projeto barber\"; node \"node_modules\\\\eslint\\\\bin\\\\eslint.js\" . 2>&1 | Select-Object -First 200)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
+    ]
+  }
+}

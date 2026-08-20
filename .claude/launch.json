@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "senas-barber-dev",
+      "runtimeExecutable": "C:\\Users\\leonardo\\Desktop\\projeto barber\\.claude\\dev-server.cmd",
+      "runtimeArgs": [],
+      "port": 3000,
+      "autoPort": true
+    }
+  ]
+}
