@@ -2,16 +2,15 @@
 
 /* ==========================================================================
    Paleta — preto/branco quente (documento "Exploração Visual — Barbearia").
-   Claro é o modo padrão; escuro entra via [data-theme-mode="escuro"] (escolha
-   explícita do usuário) ou via prefers-color-scheme quando o modo é
-   "sistema" — sem JS, o navegador já reavalia sozinho se o SO mudar.
-   Accent (6 tokens) é resolvido no servidor a partir de tema_cor do usuário
-   logado e injetado inline pelo layout raiz; os valores abaixo em :root são
-   só o fallback (tema "neutro") pra antes disso existir/pra visitante.
+   Um único modo, sempre claro — a personalização por usuário é só a cor de
+   destaque. Accent (4 tokens) é resolvido no servidor a partir de tema_cor
+   do usuário logado e injetado inline pelo layout raiz; os valores abaixo em
+   :root são só o fallback (tema "neutro") pra antes disso existir/visitante.
    ========================================================================== */
 
 :root {
-  /* -- claro (padrão) -- */
+  color-scheme: light;
+
   --color-bg: #FAFAF8;
   --color-panel: #FFFFFF;
   --color-panel-2: #F2F1EE;
@@ -20,67 +19,24 @@
   --color-text-dim: #57544E;
 
   /* Superfície estrutural sempre quase-preta (barra de total, cabeçalho de
-     login) — independe do modo claro/escuro escolhido. */
+     login) — um contraste fixo, não liga com a cor de destaque. */
   --color-ink: #0E0E0E;
   --color-ink-text: #FAFAF8;
   --color-ink-text-dim: #8A867E;
 
-  /* Accent — fallback "neutro", sobrescrito inline por tema.ts no layout raiz. */
+  /* Accent — fallback "neutro" (preto), sobrescrito inline por tema.ts no layout raiz. */
   --color-accent: #111111;
   --color-on-accent: #FAFAF8;
-  --color-accent-text: #FAFAF8;
-  --color-accent-on-light: #111111;
-  --color-accent-soft-light: #F1EFEA;
-  --color-accent-border-light: #111111;
-
-  /* Consumo semântico: qual dos dois tons de accent-text usar no modo atual. */
-  --color-accent-label: var(--color-accent-on-light);
-  --color-accent-soft: var(--color-accent-soft-light);
-  --color-accent-border: var(--color-accent-border-light);
+  --color-accent-ink-label: #FAFAF8;
+  --color-accent-label: #111111;
+  --color-accent-soft: #F1EFEA;
+  --color-accent-border: #111111;
 
   /* Tags de item (serviço/consumo) — cor própria, não ligada ao accent do usuário. */
   --color-serv: #8C6A1E;
   --color-cons: #3F7A32;
   --color-danger: #C6362B;
   --color-warn: #A9700B;
-}
-
-:root[data-theme-mode="escuro"] {
-  --color-bg: #0E0E0E;
-  --color-panel: #1C1B19;
-  --color-panel-2: #201F1C;
-  --color-border: #33312D;
-  --color-text: #FAFAF8;
-  --color-text-dim: #8A867E;
-
-  --color-accent-label: var(--color-accent-text);
-  --color-accent-soft: color-mix(in srgb, var(--color-accent) 16%, var(--color-panel));
-  --color-accent-border: color-mix(in srgb, var(--color-accent) 40%, var(--color-panel));
-
-  --color-serv: #C99A3A;
-  --color-cons: #7FA66B;
-  --color-danger: #E5534B;
-  --color-warn: #E0A83E;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root[data-theme-mode="sistema"] {
-    --color-bg: #0E0E0E;
-    --color-panel: #1C1B19;
-    --color-panel-2: #201F1C;
-    --color-border: #33312D;
-    --color-text: #FAFAF8;
-    --color-text-dim: #8A867E;
-
-    --color-accent-label: var(--color-accent-text);
-    --color-accent-soft: color-mix(in srgb, var(--color-accent) 16%, var(--color-panel));
-    --color-accent-border: color-mix(in srgb, var(--color-accent) 40%, var(--color-panel));
-
-    --color-serv: #C99A3A;
-    --color-cons: #7FA66B;
-    --color-danger: #E5534B;
-    --color-warn: #E0A83E;
-  }
 }
 
 @theme inline {
@@ -98,7 +54,7 @@
   --color-accent: var(--color-accent);
   --color-on-accent: var(--color-on-accent);
   --color-accent-label: var(--color-accent-label);
-  --color-accent-ink-label: var(--color-accent-text);
+  --color-accent-ink-label: var(--color-accent-ink-label);
   --color-accent-soft: var(--color-accent-soft);
   --color-accent-border: var(--color-accent-border);
   /* mantido pra código antigo (ver AGENTS.md/histórico) que ainda lê --color-accent-dim */

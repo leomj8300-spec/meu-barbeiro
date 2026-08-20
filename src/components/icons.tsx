@@ -129,3 +129,12 @@ export function IconBottle(props: IconProps) {
     </svg>
   );
 }
+
+export function IconHistory(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M5 3.5 H19 V20.5 L16.5 19 L14 20.5 L11.5 19 L9 20.5 L6.5 19 L5 20.5 Z" />
+      <path d="M8 8 H16 M8 11.5 H16 M8 15 H13" />
+    </svg>
+  );
+}

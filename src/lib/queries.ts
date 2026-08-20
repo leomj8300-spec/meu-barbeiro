@@ -86,6 +86,50 @@ export async function getAtendimentosPendentes(
   });
 }
 
+export interface AtendimentoHistorico extends AtendimentoPendente {
+  pago: boolean;
+}
+
+/**
+ * Últimos atendimentos registrados (pagos e fiado), mais recente primeiro.
+ * Dono vê de todos os barbeiros; barbeiro vê só os que ele mesmo registrou.
+ */
+export async function getHistoricoAtendimentos(
+  barbeariaId: string,
+  barbeiroId?: string,
+): Promise<AtendimentoHistorico[]> {
+  let query = (await supabaseScoped())
+    .from("atendimentos")
+    .select(
+      "id, cliente, valor, criado_em, pago, barbeiro:usuarios(nome), atendimento_servicos(nome), atendimento_consumos(nome, quantidade)",
+    )
+    .eq("barbearia_id", barbeariaId)
+    .order("criado_em", { ascending: false })
+    .limit(200);
+
+  if (barbeiroId) query = query.eq("barbeiro_id", barbeiroId);
+
+  const { data, error } = await query;
+  if (error) throw error;
+
+  return (data ?? []).map((a) => {
+    const barbeiro = a.barbeiro as unknown as { nome: string } | null;
+    return {
+      id: a.id,
+      cliente: a.cliente,
+      valor: Number(a.valor),
+      criadoEm: a.criado_em,
+      pago: a.pago,
+      barbeiroNome: barbeiro?.nome ?? "—",
+      servicos: (a.atendimento_servicos ?? []).map((s: { nome: string }) => s.nome),
+      consumos: (a.atendimento_consumos ?? []).map((c: { nome: string; quantidade: number }) => ({
+        nome: c.nome,
+        quantidade: c.quantidade,
+      })),
+    };
+  });
+}
+
 export interface CaixinhaEntrada {
   id: string;
   valor: number;

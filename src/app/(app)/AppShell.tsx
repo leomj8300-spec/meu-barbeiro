@@ -12,6 +12,7 @@ import {
   IconSliders,
   IconUsers,
   IconCalendarCheck,
+  IconHistory,
   IconDoor,
 } from "@/components/icons";
 import { logoutAction } from "@/app/actions/auth";
@@ -37,7 +38,10 @@ export function AppShell({
   const pathname = usePathname();
   const [maisAberto, setMaisAberto] = useState(false);
 
-  const tabs: Tab[] = [{ href: "/atendimento", label: "Atender", icon: IconScissors }];
+  const tabs: Tab[] = [
+    { href: "/atendimento", label: "Atender", icon: IconScissors },
+    { href: "/historico", label: "Histórico", icon: IconHistory },
+  ];
   if (config.fiadoHabilitado) tabs.push({ href: "/fiado", label: "Fiado", icon: IconTagClock });
   if (config.caixinhaHabilitada) tabs.push({ href: "/caixinha", label: "Caixinha", icon: IconCoin });
   if (config.comissaoHabilitada) tabs.push({ href: "/comissao", label: "Comissão", icon: IconPercent });
