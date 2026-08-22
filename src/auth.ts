@@ -13,17 +13,26 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       credentials: {
         email: {},
         password: {},
+        barbeariaId: {},
       },
       async authorize(credentials) {
         const email = String(credentials?.email ?? "").trim().toLowerCase();
         const senha = String(credentials?.password ?? "");
+        const barbeariaIdRaw = credentials?.barbeariaId ? String(credentials.barbeariaId) : "";
+        const barbeariaId = barbeariaIdRaw && barbeariaIdRaw !== "undefined" ? barbeariaIdRaw : undefined;
         if (!email || !senha) return null;
 
-        const { data: usuario, error } = await supabaseAdmin()
+        // Login por caminho (/b/[subdominio]/login) já vem escopado por
+        // barbearia; o /login genérico não sabe de qual tenant é, então cai
+        // pra busca só por e-mail — .maybeSingle() em vez de .single() evita
+        // derrubar o login se, um dia, duas barbearias tiverem e-mail igual.
+        let query = supabaseAdmin()
           .from("usuarios")
           .select("id, barbearia_id, nome, email, senha_hash, papel, comissao_padrao")
-          .eq("email", email)
-          .single();
+          .eq("email", email);
+        if (barbeariaId) query = query.eq("barbearia_id", barbeariaId);
+
+        const { data: usuario, error } = await query.maybeSingle();
 
         if (error || !usuario) return null;
 
