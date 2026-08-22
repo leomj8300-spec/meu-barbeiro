@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { verifyAdminSession, ADMIN_COOKIE_NAME } from "@/lib/admin-session";
 import { listarBarbearias } from "@/lib/admin";
-import { logoutAdminAction } from "@/app/actions/admin";
+import { logoutAdminAction, impersonarBarbeariaAction } from "@/app/actions/admin";
 import { IconDoor } from "@/components/icons";
 import { CriarBarbeariaForm } from "./CriarBarbeariaForm";
 
@@ -53,11 +53,25 @@ export default async function AdminPage() {
                   <span className="text-[13.5px] font-semibold">{b.nome}</span>
                   <span className="font-mono text-[11px] text-text-dim">/b/{b.subdominio}/login</span>
                 </div>
-                {b.donoNome && (
-                  <p className="text-text-dim text-[11px] mt-0.5">
-                    {b.donoNome} · {b.donoEmail}
-                  </p>
-                )}
+                <div className="flex items-center justify-between gap-2 flex-wrap mt-0.5">
+                  {b.donoNome ? (
+                    <p className="text-text-dim text-[11px]">
+                      {b.donoNome} · {b.donoEmail}
+                    </p>
+                  ) : (
+                    <span />
+                  )}
+                  {b.donoNome && (
+                    <form action={impersonarBarbeariaAction.bind(null, b.id)}>
+                      <button
+                        type="submit"
+                        className="rounded-[10px] border border-border bg-panel text-text-dim text-[11px] font-semibold px-2 py-1 hover:border-accent hover:text-accent-label"
+                      >
+                        Entrar como dono
+                      </button>
+                    </form>
+                  )}
+                </div>
               </div>
             ))}
           </div>

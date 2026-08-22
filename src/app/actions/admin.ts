@@ -6,8 +6,15 @@ import crypto from "node:crypto";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { AuthError } from "next-auth";
+import { signIn } from "@/auth";
 import { supabaseAdmin } from "@/lib/supabase/server";
-import { signAdminSession, verifyAdminSession, ADMIN_COOKIE_NAME } from "@/lib/admin-session";
+import {
+  signAdminSession,
+  verifyAdminSession,
+  signImpersonationToken,
+  ADMIN_COOKIE_NAME,
+} from "@/lib/admin-session";
 
 function timingSafeEqualStr(a: string, b: string): boolean {
   const bufA = Buffer.from(a);
@@ -122,4 +129,16 @@ export async function criarBarbeariaAction(
 
   revalidatePath("/admin");
   return { error: null, subdominio };
+}
+
+export async function impersonarBarbeariaAction(barbeariaId: string): Promise<void> {
+  if (!(await exigirAdmin())) redirect("/admin/login");
+
+  const token = await signImpersonationToken(barbeariaId);
+  try {
+    await signIn("credentials", { impersonateToken: token, redirectTo: "/atendimento" });
+  } catch (err) {
+    if (err instanceof AuthError) redirect("/admin");
+    throw err;
+  }
 }

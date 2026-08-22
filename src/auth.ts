@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { authConfig } from "./auth.config";
 import { supabaseAdmin } from "./lib/supabase/server";
 import { mintSupabaseAccessToken } from "./lib/supabase/jwt";
+import { verifyImpersonationToken } from "./lib/admin-session";
 import type { Usuario } from "./lib/types";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -14,8 +15,37 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         email: {},
         password: {},
         barbeariaId: {},
+        impersonateToken: {},
       },
       async authorize(credentials) {
+        // Super-admin "entrando como" o dono de uma barbearia (ver
+        // impersonarBarbeariaAction em src/app/actions/admin.ts) — token de
+        // 60s assinado só o servidor consegue gerar, então dispensa senha.
+        const impersonateToken = credentials?.impersonateToken
+          ? String(credentials.impersonateToken)
+          : "";
+        if (impersonateToken) {
+          const barbeariaIdAlvo = await verifyImpersonationToken(impersonateToken);
+          if (!barbeariaIdAlvo) return null;
+
+          const { data: dono, error } = await supabaseAdmin()
+            .from("usuarios")
+            .select("id, barbearia_id, nome, email, papel, comissao_padrao")
+            .eq("barbearia_id", barbeariaIdAlvo)
+            .eq("papel", "dono")
+            .maybeSingle();
+          if (error || !dono) return null;
+
+          return {
+            id: dono.id,
+            name: dono.nome,
+            email: dono.email,
+            barbeariaId: dono.barbearia_id,
+            papel: dono.papel,
+            comissaoPadrao: dono.comissao_padrao,
+          };
+        }
+
         const email = String(credentials?.email ?? "").trim().toLowerCase();
         const senha = String(credentials?.password ?? "");
         const barbeariaIdRaw = credentials?.barbeariaId ? String(credentials.barbeariaId) : "";
