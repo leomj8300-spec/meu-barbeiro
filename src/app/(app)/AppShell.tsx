@@ -67,7 +67,7 @@ export function AppShell({
               <IconRazor className="w-4 h-4" />
             </span>
             <span className="heading-display text-lg text-text hidden xs:inline">
-              Senas Barber
+              Meu Barbeiro
             </span>
           </Link>
           <div className="flex items-center gap-2 min-w-0">

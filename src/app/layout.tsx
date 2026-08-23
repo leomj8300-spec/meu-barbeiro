@@ -18,8 +18,8 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Senas Barber — Sistema Online",
-  description: "Na régua, no estilo.",
+  title: "Meu Barbeiro — Sistema Online",
+  description: "Corte & estilo.",
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {

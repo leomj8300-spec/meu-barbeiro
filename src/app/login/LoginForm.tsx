@@ -22,7 +22,7 @@ export function LoginForm({
             <IconRazor className="w-5 h-5" />
           </span>
           <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-text-dim">
-            {nomeBarbearia ?? "Senas Barber"}
+            {nomeBarbearia ?? "Meu Barbeiro"}
           </span>
         </div>
 

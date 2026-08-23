@@ -10,7 +10,7 @@ export default function AdminLoginPage() {
     <div className="min-h-dvh flex items-center justify-center p-5">
       <div className="w-full max-w-[380px]">
         <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-text-dim mb-8">
-          Senas Barber · Admin
+          Meu Barbeiro · Admin
         </p>
 
         <h1 className="heading-display text-[28px] text-text mb-2">Painel administrativo</h1>

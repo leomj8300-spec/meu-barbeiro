@@ -20,7 +20,7 @@ export default async function AdminPage() {
       <header className="border-b border-border">
         <div className="max-w-[720px] mx-auto w-full px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
           <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-text-dim">
-            Senas Barber · Admin
+            Meu Barbeiro · Admin
           </span>
           <form action={logoutAdminAction}>
             <button type="submit" className="btn-ghost" aria-label="Sair">
