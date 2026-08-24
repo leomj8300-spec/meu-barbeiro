@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  IconRazor,
+  IconBarberPole,
   IconScissors,
   IconTagClock,
   IconCoin,
@@ -64,7 +64,7 @@ export function AppShell({
         <div className="max-w-[720px] mx-auto w-full px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
           <Link href="/atendimento" className="flex items-center gap-2.5 shrink-0">
             <span className="w-9 h-9 rounded-[10px] bg-accent text-on-accent flex items-center justify-center shrink-0">
-              <IconRazor className="w-4 h-4" />
+              <IconBarberPole className="w-4 h-4" />
             </span>
             <span className="heading-display text-lg text-text hidden xs:inline">
               Meu Barbeiro

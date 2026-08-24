@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { loginAction } from "@/app/actions/auth";
-import { IconRazor } from "@/components/icons";
+import { IconBarberPole } from "@/components/icons";
 
 export function LoginForm({
   barbeariaId,
@@ -19,7 +19,7 @@ export function LoginForm({
       <div className="w-full max-w-[380px]">
         <div className="flex items-center gap-3 mb-8">
           <span className="w-11 h-11 rounded-[10px] bg-accent text-on-accent flex items-center justify-center shrink-0">
-            <IconRazor className="w-5 h-5" />
+            <IconBarberPole className="w-5 h-5" />
           </span>
           <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-text-dim">
             {nomeBarbearia ?? "Meu Barbeiro"}

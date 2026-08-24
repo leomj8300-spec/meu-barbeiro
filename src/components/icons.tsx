@@ -17,12 +17,14 @@ const base = {
   strokeLinejoin: "round" as const,
 };
 
-export function IconRazor(props: IconProps) {
+/** Marca do app — poste de barbearia. Selo do cabeçalho/login/onboarding. */
+export function IconBarberPole(props: IconProps) {
   return (
     <svg {...base} {...props}>
-      <path d="M4 20 L15 9" />
-      <path d="M13 7 L20 4 L20 8 L15 9 Z" />
-      <path d="M4 20 L7 21 L8 18 Z" />
+      <path d="M6 5 H18" />
+      <path d="M6 19 H18" />
+      <path d="M8.5 5 V19 M15.5 5 V19" />
+      <path d="M8.5 8 L15.5 11 M8.5 12 L15.5 15 M8.5 16 L15.5 19" />
     </svg>
   );
 }
