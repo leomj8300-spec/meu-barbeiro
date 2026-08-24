@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Archivo, IBM_Plex_Mono } from "next/font/google";
+import { Archivo, IBM_Plex_Mono, Prata } from "next/font/google";
 import "./globals.css";
 import { auth } from "@/auth";
 import { getPreferenciasTema } from "@/lib/queries";
@@ -17,6 +17,12 @@ const ibmPlexMono = IBM_Plex_Mono({
   weight: ["400", "500", "600"],
 });
 
+const prata = Prata({
+  variable: "--font-prata",
+  subsets: ["latin"],
+  weight: ["400"],
+});
+
 export const metadata: Metadata = {
   title: "Meu Barbeiro — Sistema Online",
   description: "Corte & estilo.",
@@ -32,7 +38,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="pt-BR"
-      className={`${archivo.variable} ${ibmPlexMono.variable} h-full antialiased`}
+      className={`${archivo.variable} ${ibmPlexMono.variable} ${prata.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-bg text-text font-sans">
         <style

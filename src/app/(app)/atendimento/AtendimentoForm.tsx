@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { registrarAtendimentoAction } from "@/app/actions/atendimento";
+import { IconUser } from "@/components/icons";
 import type { Servico, Consumo } from "@/lib/queries";
 import type { BarbeariaConfiguracoes } from "@/lib/types";
 
@@ -135,14 +136,18 @@ export function AtendimentoForm({
         >
           Cliente
         </label>
-        <input
-          id="cliente"
-          value={cliente}
-          onChange={(e) => setCliente(e.target.value)}
-          type="text"
-          required
-          className="w-full bg-panel-2 border border-border rounded-[10px] text-text px-3 py-2.5 text-[15px] focus:outline-none focus:border-accent"
-        />
+        <div className="flex items-center gap-2.5 rounded-[10px] border border-border bg-panel h-[52px] px-3.5 focus-within:border-accent">
+          <IconUser className="w-[17px] h-[17px] text-text-dim shrink-0" />
+          <input
+            id="cliente"
+            value={cliente}
+            onChange={(e) => setCliente(e.target.value)}
+            type="text"
+            required
+            placeholder="Nome do cliente"
+            className="flex-1 min-w-0 bg-transparent text-text text-[15px] focus:outline-none"
+          />
+        </div>
       </div>
 
       <section className="panel p-4 mb-4">
@@ -274,22 +279,26 @@ export function AtendimentoForm({
         )}
       </section>
 
-      <div className="panel-ink flex justify-between items-end px-4 py-4 mb-4">
-        <div className="flex flex-col gap-1">
-          <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-ink-text-dim">
-            Total · {totalItens} {totalItens === 1 ? "item" : "itens"}
-          </span>
-          <span className="font-mono text-[28px] font-semibold leading-none">{fmt(valorFinal)}</span>
+      {/* Respiro pro conteúdo não ficar escondido atrás da faixa fixa abaixo. */}
+      <div className="h-[86px]" />
+
+      <div className="fixed bottom-[76px] left-0 right-0 z-30 max-w-[720px] mx-auto px-4 sm:px-6">
+        <div className="panel-ink flex items-center justify-between gap-3 px-4 py-3.5 shadow-[0_12px_30px_-10px_rgba(14,14,14,0.5)]">
+          <div className="flex flex-col gap-0.5 min-w-0">
+            <span className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-ink-text-dim">
+              Total · {totalItens} {totalItens === 1 ? "item" : "itens"}
+            </span>
+            <span className="font-mono text-[24px] font-semibold leading-none">{fmt(valorFinal)}</span>
+          </div>
+          <button
+            type="submit"
+            disabled={pending}
+            className="shrink-0 h-[46px] rounded-[10px] bg-accent text-on-accent font-semibold text-[14px] px-5 disabled:opacity-40"
+          >
+            {pending ? "Registrando..." : "Registrar"}
+          </button>
         </div>
       </div>
-
-      <button
-        type="submit"
-        disabled={pending}
-        className="btn-primary w-full py-3.5 text-[15px]"
-      >
-        {pending ? "Registrando..." : "Registrar atendimento"}
-      </button>
     </form>
   );
 }

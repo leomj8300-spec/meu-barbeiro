@@ -4,14 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  IconBarberPole,
   IconScissors,
   IconTagClock,
   IconCoin,
-  IconPercent,
   IconSliders,
   IconUsers,
-  IconCalendarCheck,
   IconHistory,
   IconDoor,
 } from "@/components/icons";
@@ -43,9 +40,12 @@ export function AppShell({
     { href: "/historico", label: "Histórico", icon: IconHistory },
   ];
   if (config.fiadoHabilitado) tabs.push({ href: "/fiado", label: "Fiado", icon: IconTagClock });
-  if (config.caixinhaHabilitada) tabs.push({ href: "/caixinha", label: "Caixinha", icon: IconCoin });
-  if (config.comissaoHabilitada) tabs.push({ href: "/comissao", label: "Comissão", icon: IconPercent });
-  if (papel === "dono") tabs.push({ href: "/fechamento", label: "Fechamento", icon: IconCalendarCheck });
+  // Caixa (fechamento+caixinha+comissão) é sempre relevante pro dono; pro
+  // barbeiro só existe se sobrar algo pessoal pra ver ali (a própria página
+  // já redireciona se não sobrar nada, então a aba segue a mesma regra).
+  if (papel === "dono" || config.caixinhaHabilitada || config.comissaoHabilitada) {
+    tabs.push({ href: "/caixa", label: "Caixa", icon: IconCoin });
+  }
 
   const ferramentas: Tab[] =
     papel === "dono"
@@ -56,7 +56,7 @@ export function AppShell({
             : []),
           { href: "/configuracoes", label: "Configurações", icon: IconSliders },
         ]
-      : [];
+      : [{ href: "/configuracoes", label: "Configurações", icon: IconSliders }];
 
   return (
     <div className="min-h-dvh flex flex-col">
@@ -64,7 +64,7 @@ export function AppShell({
         <div className="max-w-[720px] mx-auto w-full px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
           <Link href="/atendimento" className="flex items-center gap-2.5 shrink-0">
             <span className="w-9 h-9 rounded-[10px] bg-accent text-on-accent flex items-center justify-center shrink-0">
-              <IconBarberPole className="w-4 h-4" />
+              <IconScissors className="w-4 h-4" />
             </span>
             <span className="heading-display text-lg text-text hidden xs:inline">
               Meu Barbeiro
@@ -75,13 +75,6 @@ export function AppShell({
               <p className="text-xs font-semibold text-text truncate">{nome}</p>
               <p className="text-[10px] uppercase tracking-wider text-accent-label font-bold">{papel}</p>
             </div>
-            <Link
-              href="/configuracoes"
-              className="btn-ghost w-9 h-9 !p-0 rounded-full"
-              aria-label="Preferências"
-            >
-              <IconSliders className="w-4 h-4" />
-            </Link>
             <form action={logoutAction}>
               <button type="submit" className="btn-ghost" aria-label="Sair">
                 <IconDoor className="w-4 h-4" />

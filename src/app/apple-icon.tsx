@@ -3,20 +3,8 @@ import { ImageResponse } from "next/og";
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
 
-const INK = "#17171B";
-const GOLD = "#F0A63C";
-
-function stripeGradient(pairs: number, angle: number): string {
-  const step = 100 / pairs;
-  const stops: string[] = [];
-  for (let i = 0; i < pairs; i++) {
-    const start = i * step;
-    const mid = start + step * 0.55;
-    const end = start + step;
-    stops.push(`${GOLD} ${start}%`, `${GOLD} ${mid}%`, `${INK} ${mid}%`, `${INK} ${end}%`);
-  }
-  return `linear-gradient(${angle}deg, ${stops.join(", ")})`;
-}
+const INK = "#16161D";
+const IVORY = "#FAF9F7";
 
 export default function AppleIcon() {
   const s = size.width;
@@ -33,27 +21,21 @@ export default function AppleIcon() {
           justifyContent: "center",
         }}
       >
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <div style={{ width: s * 0.5, height: s * 0.08, background: GOLD, borderRadius: s * 0.04 }} />
-          <div
-            style={{
-              width: s * 0.26,
-              height: s * 0.56,
-              marginTop: s * 0.02,
-              borderRadius: s * 0.13,
-              background: stripeGradient(6, 55),
-            }}
-          />
-          <div
-            style={{
-              width: s * 0.5,
-              height: s * 0.08,
-              marginTop: s * 0.02,
-              background: GOLD,
-              borderRadius: s * 0.04,
-            }}
-          />
-        </div>
+        <svg
+          width={s * 0.6}
+          height={s * 0.6}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={IVORY}
+          strokeWidth={1.9}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="6" cy="6.5" r="2.6" />
+          <circle cx="6" cy="17.5" r="2.6" />
+          <path d="M20 4 L8.3 15.5" />
+          <path d="M8.3 8.5 L20 20" />
+        </svg>
       </div>
     ),
     { ...size },

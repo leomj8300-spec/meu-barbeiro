@@ -17,18 +17,6 @@ const base = {
   strokeLinejoin: "round" as const,
 };
 
-/** Marca do app — poste de barbearia. Selo do cabeçalho/login/onboarding. */
-export function IconBarberPole(props: IconProps) {
-  return (
-    <svg {...base} {...props}>
-      <path d="M6 5 H18" />
-      <path d="M6 19 H18" />
-      <path d="M8.5 5 V19 M15.5 5 V19" />
-      <path d="M8.5 8 L15.5 11 M8.5 12 L15.5 15 M8.5 16 L15.5 19" />
-    </svg>
-  );
-}
-
 export function IconScissors(props: IconProps) {
   return (
     <svg {...base} {...props}>
@@ -68,16 +56,6 @@ export function IconCoin(props: IconProps) {
   );
 }
 
-export function IconPercent(props: IconProps) {
-  return (
-    <svg {...base} {...props}>
-      <circle cx="7" cy="7" r="2.6" />
-      <circle cx="17" cy="17" r="2.6" />
-      <path d="M18.5 5.5 L5.5 18.5" />
-    </svg>
-  );
-}
-
 export function IconUsers(props: IconProps) {
   return (
     <svg {...base} {...props}>
@@ -85,17 +63,6 @@ export function IconUsers(props: IconProps) {
       <path d="M3.5 20 C3.5 15.8 6 13.5 9 13.5 C12 13.5 14.5 15.8 14.5 20" />
       <circle cx="17.5" cy="9" r="2.4" />
       <path d="M15 20 C15 16.8 16.2 15 17.9 14.6" />
-    </svg>
-  );
-}
-
-export function IconCalendarCheck(props: IconProps) {
-  return (
-    <svg {...base} {...props}>
-      <rect x="3.5" y="5" width="17" height="15" rx="0.5" />
-      <path d="M3.5 9.5 H20.5" />
-      <path d="M8 3 V6.5 M16 3 V6.5" />
-      <path d="M8 14 L10.5 16.5 L16 11.5" />
     </svg>
   );
 }
@@ -137,6 +104,42 @@ export function IconHistory(props: IconProps) {
     <svg {...base} {...props}>
       <path d="M5 3.5 H19 V20.5 L16.5 19 L14 20.5 L11.5 19 L9 20.5 L6.5 19 L5 20.5 Z" />
       <path d="M8 8 H16 M8 11.5 H16 M8 15 H13" />
+    </svg>
+  );
+}
+
+export function IconMail(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="2.5" y="5" width="19" height="14" rx="2.5" />
+      <path d="M3 7 L12 13 L21 7" />
+    </svg>
+  );
+}
+
+export function IconLock(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="3.5" y="11" width="17" height="10" rx="2.5" />
+      <path d="M7.5 11 V7.5 a4.5 4.5 0 0 1 9 0 V11" />
+    </svg>
+  );
+}
+
+export function IconUser(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="12" cy="7.5" r="3.8" />
+      <path d="M4.5 20.5 C4.5 16.4 7.6 13.5 12 13.5 C16.4 13.5 19.5 16.4 19.5 20.5" />
+    </svg>
+  );
+}
+
+export function IconSearch(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="11" cy="11" r="7" />
+      <path d="M16 16 L20.5 20.5" />
     </svg>
   );
 }

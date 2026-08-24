@@ -12,6 +12,18 @@ function fmtData(iso: string) {
   return new Date(iso).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
 }
 
+function iniciais(nome: string) {
+  const partes = nome.trim().split(/\s+/);
+  const letras = partes.length > 1 ? [partes[0][0], partes[partes.length - 1][0]] : [partes[0]?.[0] ?? ""];
+  return letras.join("").toUpperCase();
+}
+
+function diasDesde(iso: string) {
+  const dias = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 86400000));
+  if (dias === 0) return "hoje";
+  return dias === 1 ? "1 dia" : `${dias} dias`;
+}
+
 export function FiadoList({
   pendentes,
   vePorBarbeiro,
@@ -35,6 +47,7 @@ export function FiadoList({
       nome: itens[0].cliente,
       itens,
       total: itens.reduce((s, a) => s + a.valor, 0),
+      maisAntigo: itens.reduce((min, a) => (a.criadoEm < min ? a.criadoEm : min), itens[0].criadoEm),
     }));
   }, [pendentes]);
 
@@ -98,9 +111,12 @@ export function FiadoList({
             <div key={g.chave} className="panel overflow-hidden">
               <div
                 onClick={() => toggle(g.chave)}
-                className="flex items-center justify-between gap-2 px-4 py-3 cursor-pointer flex-wrap"
+                className="flex items-center gap-3 px-4 py-3 cursor-pointer"
               >
-                <div className="min-w-0">
+                <span className="w-9 h-9 rounded-full bg-panel-2 border border-border flex items-center justify-center font-semibold text-[12px] text-text-dim shrink-0">
+                  {iniciais(g.nome)}
+                </span>
+                <div className="min-w-0 flex-1">
                   <span className="text-[15px] font-medium">{g.nome}</span>
                   {g.itens.length > 1 && (
                     <span className="chip chip-off ml-1.5 !py-0.5 !px-2 text-[10.5px] font-semibold align-middle">
@@ -108,9 +124,11 @@ export function FiadoList({
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-2.5">
-                  <span className="font-mono text-sm font-semibold text-warn">{fmt(g.total)}</span>
-                  <span className="text-text-dim text-[11px]">{aberto ? "▲" : "▼"}</span>
+                <div className="text-right shrink-0">
+                  <p className="font-mono text-sm font-semibold text-warn">{fmt(g.total)}</p>
+                  <p className="text-text-dim text-[10px] mt-0.5">
+                    {diasDesde(g.maisAntigo)} · {aberto ? "▲" : "▼"}
+                  </p>
                 </div>
               </div>
 

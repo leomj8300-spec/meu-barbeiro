@@ -67,6 +67,7 @@
 
   --font-sans: var(--font-archivo);
   --font-mono: var(--font-ibm-plex-mono);
+  --font-display: var(--font-prata);
 }
 
 html {
@@ -205,9 +206,9 @@ body {
   }
 
   .heading-display {
-    font-family: var(--font-sans);
-    font-weight: 600;
-    letter-spacing: -0.03em;
-    line-height: 1.05;
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: 0;
+    line-height: 1.1;
   }
 }

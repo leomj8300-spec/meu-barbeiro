@@ -21,7 +21,7 @@ export async function registrarCaixinhaAction(valor: number): Promise<{ error: s
   });
   if (error) return { error: "Não foi possível registrar a caixinha." };
 
-  revalidatePath("/caixinha");
+  revalidatePath("/caixa");
   return { error: null };
 }
 
@@ -36,7 +36,7 @@ export async function zerarMinhaCaixinhaAction(): Promise<{ error: string | null
     .eq("barbeiro_id", session.user.id);
   if (error) return { error: "Não foi possível zerar a caixinha." };
 
-  revalidatePath("/caixinha");
+  revalidatePath("/caixa");
   return { error: null };
 }
 
@@ -51,6 +51,6 @@ export async function zerarCaixinhaTudoAction(): Promise<{ error: string | null 
     .eq("barbearia_id", session.user.barbeariaId);
   if (error) return { error: "Não foi possível zerar a caixinha." };
 
-  revalidatePath("/caixinha");
+  revalidatePath("/caixa");
   return { error: null };
 }

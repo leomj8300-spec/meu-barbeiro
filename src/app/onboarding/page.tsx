@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { getConfiguracoes } from "@/lib/queries";
-import { IconBarberPole } from "@/components/icons";
+import { IconScissors } from "@/components/icons";
 import { OnboardingWizard } from "./OnboardingWizard";
 
 export default async function OnboardingPage() {
@@ -22,7 +22,7 @@ export default async function OnboardingPage() {
       <div className="w-full max-w-[440px]">
         <div className="flex items-center gap-3 mb-6">
           <span className="w-11 h-11 rounded-[10px] bg-accent text-on-accent flex items-center justify-center shrink-0">
-            <IconBarberPole className="w-6 h-6" />
+            <IconScissors className="w-6 h-6" />
           </span>
           <div>
             <h1 className="heading-display text-xl text-text leading-none">Configurar barbearia</h1>

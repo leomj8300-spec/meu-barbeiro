@@ -27,6 +27,6 @@ export async function fecharPeriodoAction(): Promise<{ error: string | null }> {
   });
   if (error) return { error: "Não foi possível fechar o período." };
 
-  revalidatePath("/fechamento");
+  revalidatePath("/caixa");
   return { error: null };
 }

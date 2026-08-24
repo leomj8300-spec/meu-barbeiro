@@ -306,10 +306,15 @@ export interface PeriodoAtual {
  * Totais do período em aberto: desde o fim do último fechamento (ou desde a
  * criação da barbearia, se nunca fechou) até agora. Não apaga nada — é
  * apenas um recorte por data sobre os atendimentos/caixinhas já existentes.
+ *
+ * Sem barbeiroId: totais da barbearia inteira (visão do Dono). Com
+ * barbeiroId: só os atendimentos/caixinhas daquele barbeiro (visão pessoal
+ * do Barbeiro — nunca deve ver o total da barbearia toda).
  */
 export async function getPeriodoAtual(
   barbeariaId: string,
   comissaoHabilitada: boolean,
+  barbeiroId?: string,
 ): Promise<PeriodoAtual> {
   const { data: ultimoFechamento } = await (await supabaseScoped())
     .from("fechamentos_semanais")
@@ -331,20 +336,24 @@ export async function getPeriodoAtual(
     inicio = barbearia?.criado_em ?? new Date(0).toISOString();
   }
 
-  const { data: atendimentos, error: errAtendimentos } = await (await supabaseScoped())
+  let atendimentosQuery = (await supabaseScoped())
     .from("atendimentos")
     .select(
       "valor, pago, barbeiro_id, preco_negociado, atendimento_servicos(preco, comissionavel), atendimento_consumos(preco, quantidade)",
     )
     .eq("barbearia_id", barbeariaId)
     .gte("criado_em", inicio);
+  if (barbeiroId) atendimentosQuery = atendimentosQuery.eq("barbeiro_id", barbeiroId);
+  const { data: atendimentos, error: errAtendimentos } = await atendimentosQuery;
   if (errAtendimentos) throw errAtendimentos;
 
-  const { data: caixinhas, error: errCaixinhas } = await (await supabaseScoped())
+  let caixinhasQuery = (await supabaseScoped())
     .from("caixinhas")
     .select("valor")
     .eq("barbearia_id", barbeariaId)
     .gte("criado_em", inicio);
+  if (barbeiroId) caixinhasQuery = caixinhasQuery.eq("barbeiro_id", barbeiroId);
+  const { data: caixinhas, error: errCaixinhas } = await caixinhasQuery;
   if (errCaixinhas) throw errCaixinhas;
 
   let comissaoPorId = new Map<string, number>();
