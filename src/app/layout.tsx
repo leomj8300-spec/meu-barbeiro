@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Archivo, IBM_Plex_Mono, Prata } from "next/font/google";
 import "./globals.css";
 import { auth } from "@/auth";
@@ -26,6 +26,19 @@ const prata = Prata({
 export const metadata: Metadata = {
   title: "Meu Barbeiro — Sistema Online",
   description: "Corte & estilo.",
+  appleWebApp: {
+    capable: true,
+    title: "Meu Barbeiro",
+    statusBarStyle: "black-translucent",
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: "#16161D",
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
