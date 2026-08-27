@@ -9,7 +9,16 @@ export default async function FiadoPage() {
   const session = await auth();
   if (!session?.user) return null;
 
-  const configuracoes = await getConfiguracoes(session.user.barbeariaId);
+  // As duas buscas não dependem uma da outra — dispara em paralelo em vez
+  // de esperar configuracoes pra só então buscar pendentes (o resultado só
+  // é descartado no caminho raro de redirect).
+  const [configuracoes, pendentes] = await Promise.all([
+    getConfiguracoes(session.user.barbeariaId),
+    getAtendimentosPendentes(
+      session.user.barbeariaId,
+      session.user.papel === "barbeiro" ? session.user.id : undefined,
+    ),
+  ]);
   if (!configuracoes) {
     if (session.user.papel === "dono") redirect("/onboarding");
     redirect("/atendimento");
@@ -17,11 +26,6 @@ export default async function FiadoPage() {
   if (!configuracoes.fiadoHabilitado) {
     redirect("/atendimento");
   }
-
-  const pendentes = await getAtendimentosPendentes(
-    session.user.barbeariaId,
-    session.user.papel === "barbeiro" ? session.user.id : undefined,
-  );
 
   return (
     <>

@@ -10,16 +10,19 @@ export default async function AtendimentoPage() {
   const session = await auth();
   if (!session?.user) return null; // proxy.ts já redireciona pra /login
 
-  const configuracoes = await getConfiguracoes(session.user.barbeariaId);
+  // As três buscas não dependem uma da outra — dispara tudo junto em vez de
+  // esperar configuracoes pra só então buscar consumos (economiza uma
+  // viagem de rede a cada troca de aba).
+  const [configuracoes, servicos, todosConsumos] = await Promise.all([
+    getConfiguracoes(session.user.barbeariaId),
+    getServicos(session.user.barbeariaId),
+    getConsumos(session.user.barbeariaId),
+  ]);
   if (!configuracoes) {
     if (session.user.papel === "dono") redirect("/onboarding");
   }
   const config = configuracoes ?? CONFIGURACOES_PADRAO;
-
-  const [servicos, consumos] = await Promise.all([
-    getServicos(session.user.barbeariaId),
-    config.controleEstoqueHabilitado ? getConsumos(session.user.barbeariaId) : Promise.resolve([]),
-  ]);
+  const consumos = config.controleEstoqueHabilitado ? todosConsumos : [];
 
   return (
     <>
