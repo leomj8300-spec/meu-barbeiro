@@ -39,6 +39,10 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   themeColor: "#16161D",
+  // "cover" faz o conteúdo ir até a borda física da tela — necessário pra
+  // env(safe-area-inset-*) resolver pra um valor real (senão fica 0) e a
+  // barra inferior fixa não ficar embaixo do home indicator do iPhone.
+  viewportFit: "cover",
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {

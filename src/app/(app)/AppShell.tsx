@@ -85,7 +85,12 @@ export function AppShell({
         </div>
       </header>
 
-      <main className="flex-1 w-full max-w-[720px] mx-auto px-4 sm:px-6 py-5 pb-24">{children}</main>
+      <main
+        className="flex-1 w-full max-w-[720px] mx-auto px-4 sm:px-6 py-5"
+        style={{ paddingBottom: "calc(6rem + env(safe-area-inset-bottom))" }}
+      >
+        {children}
+      </main>
 
       {maisAberto && (
         <button
@@ -96,7 +101,10 @@ export function AppShell({
       )}
 
       {maisAberto && ferramentas.length > 0 && (
-        <div className="fixed bottom-[76px] left-0 right-0 z-50 max-w-[720px] mx-auto px-3">
+        <div
+          className="fixed left-0 right-0 z-50 max-w-[720px] mx-auto px-3"
+          style={{ bottom: "calc(76px + env(safe-area-inset-bottom))" }}
+        >
           <div className="panel grid grid-cols-2 gap-2 p-3">
             {ferramentas.map((f) => {
               const Icon = f.icon;
@@ -121,7 +129,10 @@ export function AppShell({
         </div>
       )}
 
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-panel">
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-panel"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
         <div className="max-w-[720px] mx-auto w-full grid" style={{ gridTemplateColumns: `repeat(${tabs.length + (ferramentas.length > 0 ? 1 : 0)}, 1fr)` }}>
           {tabs.map((tab) => {
             const Icon = tab.icon;

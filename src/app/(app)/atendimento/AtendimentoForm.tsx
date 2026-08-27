@@ -280,9 +280,12 @@ export function AtendimentoForm({
       </section>
 
       {/* Respiro pro conteúdo não ficar escondido atrás da faixa fixa abaixo. */}
-      <div className="h-[86px]" />
+      <div style={{ height: "calc(86px + env(safe-area-inset-bottom))" }} />
 
-      <div className="fixed bottom-[76px] left-0 right-0 z-30 max-w-[720px] mx-auto px-4 sm:px-6">
+      <div
+        className="fixed left-0 right-0 z-30 max-w-[720px] mx-auto px-4 sm:px-6"
+        style={{ bottom: "calc(76px + env(safe-area-inset-bottom))" }}
+      >
         <div className="panel-ink flex items-center justify-between gap-3 px-4 py-3.5 shadow-[0_12px_30px_-10px_rgba(14,14,14,0.5)]">
           <div className="flex flex-col gap-0.5 min-w-0">
             <span className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-ink-text-dim">
