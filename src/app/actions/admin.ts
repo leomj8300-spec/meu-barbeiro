@@ -131,6 +131,71 @@ export async function criarBarbeariaAction(
   return { error: null, subdominio };
 }
 
+const editarBarbeariaSchema = z.object({
+  id: z.string().uuid(),
+  nomeBarbearia: z.string().trim().min(1, "Informe o nome da barbearia."),
+  subdominio: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .min(1, "Informe o identificador da barbearia.")
+    .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/, "Use só letras minúsculas, números e hífen."),
+  nomeDono: z.string().trim().min(1, "Informe o nome do dono."),
+  emailDono: z.string().trim().toLowerCase().email("Informe um e-mail válido."),
+});
+
+export type EditarBarbeariaInput = z.infer<typeof editarBarbeariaSchema>;
+
+export async function editarBarbeariaAction(
+  input: EditarBarbeariaInput,
+): Promise<{ error: string | null }> {
+  if (!(await exigirAdmin())) return { error: "Sessão de administrador expirada." };
+
+  const parsed = editarBarbeariaSchema.safeParse(input);
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Dados inválidos." };
+  const { id, nomeBarbearia, subdominio, nomeDono, emailDono } = parsed.data;
+
+  const db = supabaseAdmin();
+
+  const { error: errBarbearia } = await db
+    .from("barbearias")
+    .update({ nome: nomeBarbearia, subdominio })
+    .eq("id", id);
+  if (errBarbearia) {
+    if (errBarbearia.code === "23505") {
+      return { error: "Já existe uma barbearia com esse identificador." };
+    }
+    return { error: "Não foi possível atualizar a barbearia." };
+  }
+
+  const { error: errDono } = await db
+    .from("usuarios")
+    .update({ nome: nomeDono, email: emailDono })
+    .eq("barbearia_id", id)
+    .eq("papel", "dono");
+  if (errDono) {
+    if (errDono.code === "23505") {
+      return { error: "Já existe um usuário com esse e-mail nessa barbearia." };
+    }
+    return { error: "Não foi possível atualizar o dono." };
+  }
+
+  revalidatePath("/admin");
+  return { error: null };
+}
+
+export async function excluirBarbeariaAction(barbeariaId: string): Promise<{ error: string | null }> {
+  if (!(await exigirAdmin())) return { error: "Sessão de administrador expirada." };
+
+  // barbearia_id em cascata em todas as tabelas (ver 0001_init.sql) — apagar
+  // a barbearia já leva junto usuários, atendimentos, serviços, etc.
+  const { error } = await supabaseAdmin().from("barbearias").delete().eq("id", barbeariaId);
+  if (error) return { error: "Não foi possível excluir a barbearia." };
+
+  revalidatePath("/admin");
+  return { error: null };
+}
+
 export async function impersonarBarbeariaAction(barbeariaId: string): Promise<void> {
   if (!(await exigirAdmin())) redirect("/admin/login");
 

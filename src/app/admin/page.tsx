@@ -1,10 +1,15 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { verifyAdminSession, ADMIN_COOKIE_NAME } from "@/lib/admin-session";
-import { listarBarbearias } from "@/lib/admin";
-import { logoutAdminAction, impersonarBarbeariaAction } from "@/app/actions/admin";
+import { listarBarbearias, getEstatisticasGerais } from "@/lib/admin";
+import { logoutAdminAction } from "@/app/actions/admin";
 import { IconDoor } from "@/components/icons";
 import { CriarBarbeariaForm } from "./CriarBarbeariaForm";
+import { BarbeariasList } from "./BarbeariasList";
+
+function fmt(v: number) {
+  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
 
 export default async function AdminPage() {
   const cookieStore = await cookies();
@@ -13,7 +18,10 @@ export default async function AdminPage() {
     redirect("/admin/login");
   }
 
-  const barbearias = await listarBarbearias();
+  const [barbearias, estatisticas] = await Promise.all([
+    listarBarbearias(),
+    getEstatisticasGerais(),
+  ]);
 
   return (
     <div className="min-h-dvh flex flex-col">
@@ -37,6 +45,37 @@ export default async function AdminPage() {
           <p className="text-text-dim text-xs">Cadastro e acesso das barbearias clientes</p>
         </div>
 
+        <div className="grid grid-cols-2 gap-2">
+          <div className="panel p-3.5">
+            <p className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-text-dim">
+              Barbearias
+            </p>
+            <p className="font-mono text-2xl font-bold mt-0.5">{estatisticas.totalBarbearias}</p>
+          </div>
+          <div className="panel p-3.5">
+            <p className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-text-dim">
+              Donos · Barbeiros
+            </p>
+            <p className="font-mono text-2xl font-bold mt-0.5">
+              {estatisticas.totalDonos} · {estatisticas.totalBarbeiros}
+            </p>
+          </div>
+          <div className="panel p-3.5">
+            <p className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-text-dim">
+              Atendimentos
+            </p>
+            <p className="font-mono text-2xl font-bold mt-0.5">{estatisticas.totalAtendimentos}</p>
+          </div>
+          <div className="panel-accent p-3.5">
+            <p className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-text-dim">
+              Faturado (total)
+            </p>
+            <p className="font-mono text-2xl font-bold text-accent-label mt-0.5">
+              {fmt(estatisticas.faturamentoTotal)}
+            </p>
+          </div>
+        </div>
+
         <CriarBarbeariaForm />
 
         <section className="panel p-4">
@@ -46,35 +85,7 @@ export default async function AdminPage() {
           {barbearias.length === 0 && (
             <p className="text-text-dim text-xs">Nenhuma barbearia cadastrada ainda.</p>
           )}
-          <div className="flex flex-col gap-1.5">
-            {barbearias.map((b) => (
-              <div key={b.id} className="rounded-[10px] border border-border bg-panel-2 px-3 py-2.5">
-                <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <span className="text-[13.5px] font-semibold">{b.nome}</span>
-                  <span className="font-mono text-[11px] text-text-dim">/b/{b.subdominio}/login</span>
-                </div>
-                <div className="flex items-center justify-between gap-2 flex-wrap mt-0.5">
-                  {b.donoNome ? (
-                    <p className="text-text-dim text-[11px]">
-                      {b.donoNome} · {b.donoEmail}
-                    </p>
-                  ) : (
-                    <span />
-                  )}
-                  {b.donoNome && (
-                    <form action={impersonarBarbeariaAction.bind(null, b.id)}>
-                      <button
-                        type="submit"
-                        className="rounded-[10px] border border-border bg-panel text-text-dim text-[11px] font-semibold px-2 py-1 hover:border-accent hover:text-accent-label"
-                      >
-                        Entrar como dono
-                      </button>
-                    </form>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+          <BarbeariasList barbearias={barbearias} />
         </section>
       </main>
     </div>
