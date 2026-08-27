@@ -14,7 +14,7 @@ const tenantProxy = NextAuth(authConfig).auth as unknown as NextProxy;
 export default async function proxy(request: NextRequest, event: NextFetchEvent) {
   const { pathname } = request.nextUrl;
 
-  if (pathname.startsWith("/admin")) {
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
     if (pathname === "/admin/login") {
       return NextResponse.next();
     }
@@ -29,5 +29,5 @@ export default async function proxy(request: NextRequest, event: NextFetchEvent)
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|manifest|icons|icon|apple-icon).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|manifest|icons|icon|apple-icon|admin-manifest).*)"],
 };
