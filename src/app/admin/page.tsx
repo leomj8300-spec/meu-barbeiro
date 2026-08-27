@@ -3,13 +3,9 @@ import { cookies } from "next/headers";
 import { verifyAdminSession, ADMIN_COOKIE_NAME } from "@/lib/admin-session";
 import { listarBarbearias, getEstatisticasGerais } from "@/lib/admin";
 import { logoutAdminAction } from "@/app/actions/admin";
-import { IconDoor } from "@/components/icons";
+import { IconDoor, IconScissors, IconUsers } from "@/components/icons";
 import { CriarBarbeariaForm } from "./CriarBarbeariaForm";
 import { BarbeariasList } from "./BarbeariasList";
-
-function fmt(v: number) {
-  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
 
 export default async function AdminPage() {
   const cookieStore = await cookies();
@@ -45,33 +41,27 @@ export default async function AdminPage() {
           <p className="text-text-dim text-xs">Cadastro e acesso das barbearias clientes</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <div className="panel p-3.5">
-            <p className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-text-dim">
-              Barbearias
+        <div className="grid grid-cols-2 gap-3">
+          <div className="panel-accent p-5 flex flex-col items-center gap-2 text-center">
+            <span className="w-11 h-11 rounded-full bg-accent-soft text-accent-label flex items-center justify-center">
+              <IconScissors className="w-5 h-5" />
+            </span>
+            <p className="font-mono text-4xl font-bold text-accent-label leading-none">
+              {estatisticas.totalBarbearias}
             </p>
-            <p className="font-mono text-2xl font-bold mt-0.5">{estatisticas.totalBarbearias}</p>
-          </div>
-          <div className="panel p-3.5">
-            <p className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-text-dim">
-              Donos · Barbeiros
-            </p>
-            <p className="font-mono text-2xl font-bold mt-0.5">
-              {estatisticas.totalDonos} · {estatisticas.totalBarbeiros}
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-text-dim">
+              Barbearias cadastradas
             </p>
           </div>
-          <div className="panel p-3.5">
-            <p className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-text-dim">
-              Atendimentos
+          <div className="panel-accent p-5 flex flex-col items-center gap-2 text-center">
+            <span className="w-11 h-11 rounded-full bg-accent-soft text-accent-label flex items-center justify-center">
+              <IconUsers className="w-5 h-5" />
+            </span>
+            <p className="font-mono text-4xl font-bold text-accent-label leading-none">
+              {estatisticas.totalBarbeiros}
             </p>
-            <p className="font-mono text-2xl font-bold mt-0.5">{estatisticas.totalAtendimentos}</p>
-          </div>
-          <div className="panel-accent p-3.5">
-            <p className="font-mono text-[9.5px] uppercase tracking-[0.14em] text-text-dim">
-              Faturado (total)
-            </p>
-            <p className="font-mono text-2xl font-bold text-accent-label mt-0.5">
-              {fmt(estatisticas.faturamentoTotal)}
+            <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-text-dim">
+              Barbeiros cadastrados
             </p>
           </div>
         </div>

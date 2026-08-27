@@ -51,29 +51,18 @@ export async function listarBarbearias(): Promise<BarbeariaResumo[]> {
 
 export interface EstatisticasGerais {
   totalBarbearias: number;
-  totalDonos: number;
   totalBarbeiros: number;
-  totalAtendimentos: number;
-  faturamentoTotal: number;
 }
 
 export async function getEstatisticasGerais(): Promise<EstatisticasGerais> {
   const db = supabaseAdmin();
-  const [barbeariasRes, donosRes, barbeirosRes, atendimentosRes, valoresRes] = await Promise.all([
+  const [barbeariasRes, barbeirosRes] = await Promise.all([
     db.from("barbearias").select("id", { count: "exact", head: true }),
-    db.from("usuarios").select("id", { count: "exact", head: true }).eq("papel", "dono"),
     db.from("usuarios").select("id", { count: "exact", head: true }).eq("papel", "barbeiro"),
-    db.from("atendimentos").select("id", { count: "exact", head: true }),
-    db.from("atendimentos").select("valor").eq("pago", true),
   ]);
-
-  const faturamentoTotal = (valoresRes.data ?? []).reduce((soma, a) => soma + Number(a.valor), 0);
 
   return {
     totalBarbearias: barbeariasRes.count ?? 0,
-    totalDonos: donosRes.count ?? 0,
     totalBarbeiros: barbeirosRes.count ?? 0,
-    totalAtendimentos: atendimentosRes.count ?? 0,
-    faturamentoTotal,
   };
 }
