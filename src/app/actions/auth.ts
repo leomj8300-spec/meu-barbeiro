@@ -1,7 +1,9 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { signIn, signOut } from "@/auth";
 import { AuthError } from "next-auth";
+import { ADMIN_COOKIE_NAME, verifyAdminSession } from "@/lib/admin-session";
 
 export async function loginAction(
   _prevState: { error: string | null },
@@ -28,5 +30,13 @@ export async function loginAction(
 }
 
 export async function logoutAction() {
-  await signOut({ redirectTo: "/login" });
+  // Se o super-admin entrou nessa conta por impersonação (ver
+  // impersonarBarbeariaAction em src/app/actions/admin.ts), a sessão de
+  // admin continua ativa em paralelo — sair deve voltar pro painel de
+  // admin, não pro login de tenant.
+  const cookieStore = await cookies();
+  const adminToken = cookieStore.get(ADMIN_COOKIE_NAME)?.value;
+  const veioDoAdmin = !!adminToken && (await verifyAdminSession(adminToken));
+
+  await signOut({ redirectTo: veioDoAdmin ? "/admin" : "/login" });
 }
