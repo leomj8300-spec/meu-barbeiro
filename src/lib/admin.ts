@@ -61,6 +61,13 @@ export async function getEstatisticasGerais(): Promise<EstatisticasGerais> {
     db.from("usuarios").select("id", { count: "exact", head: true }).eq("papel", "barbeiro"),
   ]);
 
+  // Se a contagem falhar (timeout, erro de rede etc.), `count` vem null —
+  // não podemos deixar isso virar "0" na tela: 0 parece um dado real e
+  // esconderia a falha do dono, que passaria a achar que não tem barbeiro
+  // nenhum cadastrado quando na verdade é só a consulta que não respondeu.
+  if (barbeariasRes.error) throw barbeariasRes.error;
+  if (barbeirosRes.error) throw barbeirosRes.error;
+
   return {
     totalBarbearias: barbeariasRes.count ?? 0,
     totalBarbeiros: barbeirosRes.count ?? 0,
