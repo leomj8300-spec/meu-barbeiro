@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { supabaseScoped } from "@/lib/supabase/scoped";
+import { registrarErro } from "@/lib/logs";
 
 export async function marcarComoPagoAction(atendimentoId: string): Promise<{ error: string | null }> {
   const session = await auth();
@@ -20,7 +21,15 @@ export async function marcarComoPagoAction(atendimentoId: string): Promise<{ err
   }
 
   const { data, error } = await query.select("id");
-  if (error) return { error: "Não foi possível marcar como pago." };
+  if (error) {
+    await registrarErro({
+      barbeariaId: session.user.barbeariaId,
+      usuarioId: session.user.id,
+      contexto: "marcar_fiado_pago",
+      mensagem: error.message,
+    });
+    return { error: "Não foi possível marcar como pago." };
+  }
   if (!data || data.length === 0) return { error: "Atendimento não encontrado ou já pago." };
 
   revalidatePath("/fiado");

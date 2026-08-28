@@ -482,3 +482,64 @@ export const getConfiguracoes = cache(async function getConfiguracoes(
     diaInicioPeriodo: data.dia_inicio_periodo,
   };
 });
+
+export interface AcaoPropostaSuporte {
+  acao: "ajustar_comissao_barbeiro" | "alternar_recurso" | "marcar_fiado_pago";
+  params: Record<string, unknown>;
+  descricao: string;
+}
+
+export interface MensagemTicketSuporte {
+  id: string;
+  remetente: "usuario" | "ia" | "admin";
+  conteudo: string;
+  acaoProposta: AcaoPropostaSuporte | null;
+  acaoExecutada: boolean;
+  criadoEm: string;
+}
+
+export interface TicketSuporte {
+  id: string;
+  status: "aberto" | "aguardando_admin" | "resolvido" | "recusado" | "fechado";
+}
+
+/**
+ * Ticket de suporte mais recente ainda "vivo" (não fechado/recusado) de
+ * quem pediu — o chat sempre continua a mesma conversa em vez de perder o
+ * fio a cada visita, até alguém encerrar de propósito.
+ */
+export async function getTicketAtual(
+  barbeariaId: string,
+  usuarioId: string,
+): Promise<{ ticket: TicketSuporte; mensagens: MensagemTicketSuporte[] } | null> {
+  const { data: ticket, error } = await (await supabaseScoped())
+    .from("suporte_tickets")
+    .select("id, status")
+    .eq("barbearia_id", barbeariaId)
+    .eq("aberto_por", usuarioId)
+    .not("status", "in", "(fechado,recusado)")
+    .order("criado_em", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  if (!ticket) return null;
+
+  const { data: mensagens, error: errMensagens } = await (await supabaseScoped())
+    .from("suporte_mensagens")
+    .select("id, remetente, conteudo, acao_proposta, acao_executada, criado_em")
+    .eq("ticket_id", ticket.id)
+    .order("criado_em", { ascending: true });
+  if (errMensagens) throw errMensagens;
+
+  return {
+    ticket,
+    mensagens: (mensagens ?? []).map((m) => ({
+      id: m.id,
+      remetente: m.remetente,
+      conteudo: m.conteudo,
+      acaoProposta: m.acao_proposta,
+      acaoExecutada: m.acao_executada,
+      criadoEm: m.criado_em,
+    })),
+  };
+}

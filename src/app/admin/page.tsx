@@ -1,11 +1,13 @@
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { verifyAdminSession, ADMIN_COOKIE_NAME } from "@/lib/admin-session";
-import { listarBarbearias, getEstatisticasGerais } from "@/lib/admin";
+import { listarBarbearias, getEstatisticasGerais, listarTicketsSuporte } from "@/lib/admin";
 import { logoutAdminAction } from "@/app/actions/admin";
 import { IconDoor, IconScissors, IconUsers } from "@/components/icons";
 import { CriarBarbeariaForm } from "./CriarBarbeariaForm";
 import { BarbeariasList } from "./BarbeariasList";
+import { AdminTabs } from "./AdminTabs";
+import { AtivarAvisos } from "./AtivarAvisos";
 
 export default async function AdminPage() {
   const cookieStore = await cookies();
@@ -14,10 +16,15 @@ export default async function AdminPage() {
     redirect("/admin/login");
   }
 
-  const [barbearias, estatisticas] = await Promise.all([
+  const [barbearias, estatisticas, tickets] = await Promise.all([
     listarBarbearias(),
     getEstatisticasGerais(),
+    // Mesma cautela do layout do tenant: enquanto a migração do chat de
+    // suporte não estiver aplicada nesse ambiente, o painel principal não
+    // pode quebrar por causa disso.
+    listarTicketsSuporte().catch(() => []),
   ]);
+  const pendentes = tickets.filter((t) => t.status === "aguardando_admin").length;
 
   return (
     <div className="min-h-dvh flex flex-col">
@@ -26,12 +33,15 @@ export default async function AdminPage() {
           <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-text-dim">
             Meu Barbeiro · Admin
           </span>
-          <form action={logoutAdminAction}>
-            <button type="submit" className="btn-ghost" aria-label="Sair">
-              <IconDoor className="w-4 h-4" />
-              <span className="hidden sm:inline">Sair</span>
-            </button>
-          </form>
+          <div className="flex items-center gap-2">
+            <AtivarAvisos vapidPublicKey={process.env.VAPID_PUBLIC_KEY ?? ""} />
+            <form action={logoutAdminAction}>
+              <button type="submit" className="btn-ghost" aria-label="Sair">
+                <IconDoor className="w-4 h-4" />
+                <span className="hidden sm:inline">Sair</span>
+              </button>
+            </form>
+          </div>
         </div>
       </header>
 
@@ -40,6 +50,8 @@ export default async function AdminPage() {
           <h1 className="heading-display text-2xl text-text mb-1">Barbearias</h1>
           <p className="text-text-dim text-xs">Cadastro e acesso das barbearias clientes</p>
         </div>
+
+        <AdminTabs pendentes={pendentes} />
 
         <div className="grid grid-cols-2 gap-3">
           <div className="panel-accent p-5 flex flex-col items-center gap-2 text-center">

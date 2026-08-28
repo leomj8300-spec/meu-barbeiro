@@ -135,6 +135,16 @@ export function IconUser(props: IconProps) {
   );
 }
 
+export function IconHelp(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M4 5 H20 V15 H10.5 L6 19 V15 H4 Z" />
+      <path d="M9.7 9.4 C9.7 8.1 10.7 7.1 12 7.1 C13.3 7.1 14.3 8.1 14.3 9.4 C14.3 10.6 13.3 10.9 12.5 11.6 C12.2 11.9 12 12.2 12 12.6" strokeWidth={1.5} />
+      <path d="M12 14.4 V14.5" strokeWidth={2.2} />
+    </svg>
+  );
+}
+
 export function IconSearch(props: IconProps) {
   return (
     <svg {...base} {...props}>

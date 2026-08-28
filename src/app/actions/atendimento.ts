@@ -6,6 +6,7 @@ import { auth } from "@/auth";
 import { supabaseScoped } from "@/lib/supabase/scoped";
 import { getConfiguracoes } from "@/lib/queries";
 import { CONFIGURACOES_PADRAO } from "@/lib/types";
+import { registrarErro } from "@/lib/logs";
 
 const itemServicoSchema = z.object({
   servico_id: z.string().uuid(),
@@ -68,6 +69,12 @@ export async function registrarAtendimentoAction(
       const nome = error.message.split(":")[1];
       return { error: `Estoque insuficiente de: ${nome}` };
     }
+    await registrarErro({
+      barbeariaId: session.user.barbeariaId,
+      usuarioId: session.user.id,
+      contexto: "registrar_atendimento",
+      mensagem: error.message,
+    });
     return { error: "Não foi possível registrar o atendimento." };
   }
 

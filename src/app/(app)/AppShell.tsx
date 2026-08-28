@@ -13,7 +13,9 @@ import {
   IconDoor,
 } from "@/components/icons";
 import { logoutAction } from "@/app/actions/auth";
+import { SuporteChat } from "@/components/SuporteChat";
 import type { BarbeariaConfiguracoes, Papel } from "@/lib/types";
+import type { MensagemTicketSuporte } from "@/lib/queries";
 
 interface Tab {
   href: string;
@@ -25,11 +27,13 @@ export function AppShell({
   nome,
   papel,
   config,
+  ticketSuporteInicial,
   children,
 }: {
   nome: string;
   papel: Papel;
   config: BarbeariaConfiguracoes;
+  ticketSuporteInicial: { ticketId: string; mensagens: MensagemTicketSuporte[] } | null;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -75,6 +79,7 @@ export function AppShell({
               <p className="text-xs font-semibold text-text truncate">{nome}</p>
               <p className="text-[10px] uppercase tracking-wider text-accent-label font-bold">{papel}</p>
             </div>
+            <SuporteChat ticketInicial={ticketSuporteInicial} />
             <form action={logoutAction}>
               <button type="submit" className="btn-ghost" aria-label="Sair">
                 <IconDoor className="w-4 h-4" />

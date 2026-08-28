@@ -54,6 +54,95 @@ export interface EstatisticasGerais {
   totalBarbeiros: number;
 }
 
+export interface TicketAdminResumo {
+  id: string;
+  barbeariaNome: string;
+  abertoPorNome: string;
+  status: string;
+  resumo: string | null;
+  criadoEm: string;
+  atualizadoEm: string;
+}
+
+export async function listarTicketsSuporte(): Promise<TicketAdminResumo[]> {
+  const { data, error } = await supabaseAdmin()
+    .from("suporte_tickets")
+    .select(
+      "id, status, resumo, criado_em, atualizado_em, barbearia:barbearias(nome), usuario:usuarios(nome)",
+    )
+    .order("atualizado_em", { ascending: false });
+  if (error) throw error;
+
+  return (data ?? []).map((t) => {
+    const barbearia = t.barbearia as unknown as { nome: string } | null;
+    const usuario = t.usuario as unknown as { nome: string } | null;
+    return {
+      id: t.id,
+      barbeariaNome: barbearia?.nome ?? "—",
+      abertoPorNome: usuario?.nome ?? "—",
+      status: t.status,
+      resumo: t.resumo,
+      criadoEm: t.criado_em,
+      atualizadoEm: t.atualizado_em,
+    };
+  });
+}
+
+export interface MensagemTicketAdmin {
+  id: string;
+  remetente: string;
+  conteudo: string;
+  acaoProposta: unknown;
+  acaoExecutada: boolean;
+  criadoEm: string;
+}
+
+export interface TicketAdminDetalhe extends TicketAdminResumo {
+  abertoPorPapel: string;
+  mensagens: MensagemTicketAdmin[];
+}
+
+export async function getTicketDetalhe(ticketId: string): Promise<TicketAdminDetalhe | null> {
+  const db = supabaseAdmin();
+
+  const { data: ticket, error } = await db
+    .from("suporte_tickets")
+    .select(
+      "id, status, resumo, criado_em, atualizado_em, barbearia:barbearias(nome), usuario:usuarios(nome, papel)",
+    )
+    .eq("id", ticketId)
+    .maybeSingle();
+  if (error || !ticket) return null;
+
+  const { data: mensagens } = await db
+    .from("suporte_mensagens")
+    .select("id, remetente, conteudo, acao_proposta, acao_executada, criado_em")
+    .eq("ticket_id", ticketId)
+    .order("criado_em", { ascending: true });
+
+  const barbearia = ticket.barbearia as unknown as { nome: string } | null;
+  const usuario = ticket.usuario as unknown as { nome: string; papel: string } | null;
+
+  return {
+    id: ticket.id,
+    status: ticket.status,
+    resumo: ticket.resumo,
+    criadoEm: ticket.criado_em,
+    atualizadoEm: ticket.atualizado_em,
+    barbeariaNome: barbearia?.nome ?? "—",
+    abertoPorNome: usuario?.nome ?? "—",
+    abertoPorPapel: usuario?.papel ?? "—",
+    mensagens: (mensagens ?? []).map((m) => ({
+      id: m.id,
+      remetente: m.remetente,
+      conteudo: m.conteudo,
+      acaoProposta: m.acao_proposta,
+      acaoExecutada: m.acao_executada,
+      criadoEm: m.criado_em,
+    })),
+  };
+}
+
 export async function getEstatisticasGerais(): Promise<EstatisticasGerais> {
   const db = supabaseAdmin();
   const [barbeariasRes, barbeirosRes] = await Promise.all([
