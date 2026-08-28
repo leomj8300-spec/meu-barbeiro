@@ -2,24 +2,32 @@ import webpush from "web-push";
 import { supabaseAdmin } from "@/lib/supabase/server";
 import { registrarErro } from "@/lib/logs";
 
-webpush.setVapidDetails(
-  "mailto:suporte@meubarbeiro.app",
-  process.env.VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!,
-);
+let vapidConfigurado = false;
+function garantirVapid(): boolean {
+  if (vapidConfigurado) return true;
+  const publicKey = process.env.VAPID_PUBLIC_KEY;
+  const privateKey = process.env.VAPID_PRIVATE_KEY;
+  if (!publicKey || !privateKey) return false;
+  webpush.setVapidDetails("mailto:suporte@meubarbeiro.app", publicKey, privateKey);
+  vapidConfigurado = true;
+  return true;
+}
 
 /**
  * Avisa o super-admin, por notificação push, que um ticket de suporte
  * precisa de decisão manual. Dispara só nesse momento — tickets resolvidos
  * sozinhos pela IA não geram aviso, porque não exigem decisão de ninguém.
- * Nunca lança erro: falha de envio vira log, o ticket continua visível em
- * /admin/relatorios mesmo sem o aviso ter saído.
+ * Nunca lança erro: falha de envio vira log (ou, sem as chaves VAPID
+ * configuradas nesse ambiente ainda, só não faz nada), o ticket continua
+ * visível em /admin/relatorios mesmo sem o aviso ter saído.
  */
 export async function enviarAvisoTicket(params: {
   ticketId: string;
   barbeariaNome: string;
   resumo: string;
 }): Promise<void> {
+  if (!garantirVapid()) return;
+
   const { data: inscricoes, error } = await supabaseAdmin()
     .from("admin_push_subscriptions")
     .select("id, endpoint, keys");

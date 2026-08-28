@@ -11,7 +11,19 @@ import {
 import { supabaseAdmin } from "@/lib/supabase/server";
 import type { Papel } from "@/lib/types";
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
+// Instanciado sob demanda (não no carregamento do módulo) — assim, em
+// qualquer ambiente onde ANTHROPIC_API_KEY ainda não esteja configurada, o
+// app inteiro não quebra por causa disso: só essa chamada específica falha,
+// de forma tratada (ver o catch em gerarRespostaSuporte).
+let anthropic: Anthropic | null = null;
+function getAnthropic(): Anthropic {
+  if (!anthropic) {
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) throw new Error("ANTHROPIC_API_KEY não configurada.");
+    anthropic = new Anthropic({ apiKey });
+  }
+  return anthropic;
+}
 
 export interface MensagemSuporte {
   remetente: "usuario" | "ia" | "admin";
@@ -172,7 +184,7 @@ ${contexto}`;
     content: m.conteudo,
   }));
 
-  const resposta = await anthropic.messages.create({
+  const resposta = await getAnthropic().messages.create({
     model: "claude-sonnet-5",
     max_tokens: 1024,
     system,
