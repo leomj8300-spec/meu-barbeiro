@@ -142,6 +142,7 @@ export function EquipeManager({
               placeholder="Comissão %"
               value={comissaoPadrao}
               onChange={(e) => setComissaoPadrao(e.target.value)}
+              onFocus={(e) => e.target.select()}
               className="flex-1 bg-panel-2 border border-border rounded-[10px] text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
             />
             <button
@@ -204,6 +205,7 @@ function BarbeiroEditForm({
           step="0.1"
           value={comissaoPadrao}
           onChange={(e) => setComissaoPadrao(e.target.value)}
+          onFocus={(e) => e.target.select()}
           className="w-20 bg-panel border border-border rounded-[10px] text-text px-2.5 py-1.5 text-[13.5px] focus:outline-none focus:border-accent"
         />
       </div>

@@ -43,6 +43,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             barbeariaId: dono.barbearia_id,
             papel: dono.papel,
             comissaoPadrao: dono.comissao_padrao,
+            viaImpersonation: true,
           };
         }
 
@@ -88,6 +89,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.barbeariaId = (user as unknown as Record<string, unknown>).barbeariaId as string;
         token.papel = (user as unknown as Record<string, unknown>).papel as Usuario["papel"];
         token.comissaoPadrao = (user as unknown as Record<string, unknown>).comissaoPadrao as number;
+        token.viaImpersonation = (user as unknown as Record<string, unknown>).viaImpersonation as
+          | boolean
+          | undefined;
         token.supabaseAccessToken = await mintSupabaseAccessToken({
           sub: token.id as string,
           barbeariaId: token.barbeariaId as string,
@@ -102,6 +106,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.barbeariaId = token.barbeariaId as string;
         session.user.papel = token.papel as Usuario["papel"];
         session.user.comissaoPadrao = token.comissaoPadrao as number;
+        session.user.viaImpersonation = token.viaImpersonation as boolean | undefined;
       }
       session.supabaseAccessToken = token.supabaseAccessToken as string;
       return session;

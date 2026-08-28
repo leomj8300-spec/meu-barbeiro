@@ -118,6 +118,7 @@ export function OnboardingWizard() {
                 step="0.1"
                 value={comissaoPadraoPct}
                 onChange={(e) => setComissaoPadraoPct(e.target.value)}
+                onFocus={(e) => e.target.select()}
                 className="w-full bg-panel-2 border border-border rounded-[10px] text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
               />
             </div>

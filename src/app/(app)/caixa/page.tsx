@@ -30,12 +30,16 @@ export default async function CaixaPage() {
     redirect("/atendimento");
   }
 
-  const [periodoAtual, historico, minhaCaixinha, caixinhaGeral, comissoes] = await Promise.all([
-    getPeriodoAtual(
-      session.user.barbeariaId,
-      configuracoes.comissaoHabilitada,
-      ehDono ? undefined : session.user.id,
-    ),
+  // getComissoes precisa do início do período atual (periodoAtual.inicio) pra
+  // não voltar a contar atendimentos de períodos já fechados — por isso roda
+  // depois, e não dentro do mesmo Promise.all que busca periodoAtual.
+  const periodoAtual = await getPeriodoAtual(
+    session.user.barbeariaId,
+    configuracoes.comissaoHabilitada,
+    ehDono ? undefined : session.user.id,
+  );
+
+  const [historico, minhaCaixinha, caixinhaGeral, comissoes] = await Promise.all([
     ehDono ? getHistoricoFechamentos(session.user.barbeariaId) : Promise.resolve([]),
     configuracoes.caixinhaHabilitada
       ? getMinhaCaixinha(session.user.barbeariaId, session.user.id)
@@ -44,7 +48,7 @@ export default async function CaixaPage() {
       ? getCaixinhaGeral(session.user.barbeariaId)
       : Promise.resolve(null),
     configuracoes.comissaoHabilitada
-      ? getComissoes(session.user.barbeariaId, ehDono ? undefined : session.user.id)
+      ? getComissoes(session.user.barbeariaId, ehDono ? undefined : session.user.id, periodoAtual.inicio)
       : Promise.resolve([]),
   ]);
 

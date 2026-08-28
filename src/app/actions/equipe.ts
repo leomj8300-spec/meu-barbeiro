@@ -21,7 +21,10 @@ const criarBarbeiroSchema = z.object({
   nome: z.string().trim().min(1, "Informe o nome."),
   email: z.string().trim().toLowerCase().email("Informe um e-mail válido."),
   senha: z.string().min(6, "A senha precisa ter ao menos 6 caracteres."),
-  comissaoPadrao: z.number().min(0).max(100),
+  comissaoPadrao: z
+    .number()
+    .min(0, "A comissão não pode ser negativa.")
+    .max(100, "A comissão não pode passar de 100%."),
 });
 
 export async function criarBarbeiroAction(
@@ -54,7 +57,10 @@ export async function criarBarbeiroAction(
 const atualizarBarbeiroSchema = z.object({
   id: z.string().uuid(),
   nome: z.string().trim().min(1, "Informe o nome."),
-  comissaoPadrao: z.number().min(0).max(100),
+  comissaoPadrao: z
+    .number()
+    .min(0, "A comissão não pode ser negativa.")
+    .max(100, "A comissão não pode passar de 100%."),
 });
 
 export async function atualizarBarbeiroAction(

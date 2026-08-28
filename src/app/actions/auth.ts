@@ -1,9 +1,7 @@
 "use server";
 
-import { cookies } from "next/headers";
-import { signIn, signOut } from "@/auth";
+import { auth, signIn, signOut } from "@/auth";
 import { AuthError } from "next-auth";
-import { ADMIN_COOKIE_NAME, verifyAdminSession } from "@/lib/admin-session";
 
 export async function loginAction(
   _prevState: { error: string | null },
@@ -30,13 +28,17 @@ export async function loginAction(
 }
 
 export async function logoutAction() {
-  // Se o super-admin entrou nessa conta por impersonação (ver
-  // impersonarBarbeariaAction em src/app/actions/admin.ts), a sessão de
-  // admin continua ativa em paralelo — sair deve voltar pro painel de
-  // admin, não pro login de tenant.
-  const cookieStore = await cookies();
-  const adminToken = cookieStore.get(ADMIN_COOKIE_NAME)?.value;
-  const veioDoAdmin = !!adminToken && (await verifyAdminSession(adminToken));
+  // Se ESTA sessão foi criada pelo super-admin via "Entrar como dono" (ver
+  // impersonarBarbeariaAction em src/app/actions/admin.ts), sair deve voltar
+  // pro painel de admin, não pro login de tenant. A flag vem da própria
+  // sessão (setada em authorize() só no fluxo de impersonação) — checar
+  // apenas "existe um cookie de admin válido" está errado, porque esse
+  // cookie é independente da sessão atual: um super-admin pode estar logado
+  // em /admin numa aba enquanto um barbeiro comum loga normalmente noutra
+  // aba do mesmo navegador, e nesse caso o logout do barbeiro não deve ir
+  // pro /admin.
+  const session = await auth();
+  const veioDoAdmin = session?.user?.viaImpersonation === true;
 
   await signOut({ redirectTo: veioDoAdmin ? "/admin" : "/login" });
 }

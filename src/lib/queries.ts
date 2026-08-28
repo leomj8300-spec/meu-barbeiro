@@ -197,13 +197,19 @@ export interface ComissaoPorBarbeiro {
 
 /**
  * Comissão acumulada por barbeiro, calculada só sobre atendimentos já pagos
- * (fiado pendente ainda não gera comissão). Quando o preço foi negociado, a
- * base comissionável é ajustada na mesma proporção entre o valor cobrado e o
- * valor originalmente calculado (soma dos itens no momento do registro).
+ * (fiado pendente ainda não gera comissão) do período em aberto — passar o
+ * `desde` de {@link getPeriodoAtual} (início do período atual, ou seja, fim
+ * do último fechamento). Sem esse filtro, atendimentos de períodos já
+ * fechados voltam a contar aqui, fazendo a comissão parecer "a receber" de
+ * novo mesmo depois de já ter sido registrada no fechamento.
+ * Quando o preço foi negociado, a base comissionável é ajustada na mesma
+ * proporção entre o valor cobrado e o valor originalmente calculado (soma
+ * dos itens no momento do registro).
  */
 export async function getComissoes(
   barbeariaId: string,
   barbeiroId?: string,
+  desde?: string,
 ): Promise<ComissaoPorBarbeiro[]> {
   // Busca todos os usuários (não só barbeiro) — o dono também pode atender e comissionar sobre si mesmo.
   let barbeirosQuery = (await supabaseScoped())
@@ -224,6 +230,7 @@ export async function getComissoes(
           .eq("barbearia_id", barbeariaId)
           .eq("pago", true);
         if (barbeiroId) q = q.eq("barbeiro_id", barbeiroId);
+        if (desde) q = q.gte("criado_em", desde);
         return q;
       })(),
     ]);

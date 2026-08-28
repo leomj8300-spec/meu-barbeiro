@@ -10,11 +10,18 @@ const configuracoesSchema = z
     controleEstoqueHabilitado: z.boolean(),
     gestaoEquipeHabilitada: z.boolean(),
     comissaoHabilitada: z.boolean(),
-    comissaoPadraoPct: z.number().min(0).max(100),
+    comissaoPadraoPct: z
+      .number()
+      .min(0, "A comissão não pode ser negativa.")
+      .max(100, "A comissão não pode passar de 100%."),
     fiadoHabilitado: z.boolean(),
     caixinhaHabilitada: z.boolean(),
     periodicidadeFechamento: z.enum(["semanal", "quinzenal", "mensal"]),
-    diaInicioPeriodo: z.number().int().min(1).max(31),
+    diaInicioPeriodo: z
+      .number()
+      .int()
+      .min(1, "Dia inválido.")
+      .max(31, "Dia inválido."),
   })
   .refine(
     (v) => v.periodicidadeFechamento === "mensal" || v.diaInicioPeriodo <= 7,

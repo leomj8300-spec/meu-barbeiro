@@ -8,6 +8,8 @@ declare module "next-auth" {
       barbeariaId: string;
       papel: Papel;
       comissaoPadrao: number;
+      /** true quando esta sessão foi criada via "Entrar como dono" no /admin. */
+      viaImpersonation?: boolean;
     } & DefaultSession["user"];
     /** JWT assinado com o segredo legado do Supabase — ativa RLS por usuário. */
     supabaseAccessToken: string;
@@ -20,6 +22,7 @@ declare module "next-auth/jwt" {
     barbeariaId: string;
     papel: Papel;
     comissaoPadrao: number;
+    viaImpersonation?: boolean;
     supabaseAccessToken: string;
   }
 }
