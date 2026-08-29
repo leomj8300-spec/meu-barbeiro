@@ -187,9 +187,25 @@ export async function editarBarbeariaAction(
 export async function excluirBarbeariaAction(barbeariaId: string): Promise<{ error: string | null }> {
   if (!(await exigirAdmin())) return { error: "Sessão de administrador expirada." };
 
-  // barbearia_id em cascata em todas as tabelas (ver 0001_init.sql) — apagar
-  // a barbearia já leva junto usuários, atendimentos, serviços, etc.
-  const { error } = await supabaseAdmin().from("barbearias").delete().eq("id", barbeariaId);
+  const db = supabaseAdmin();
+
+  // atendimentos.barbeiro_id é "on delete restrict" de propósito (ver
+  // 0001_init.sql) — protege contra apagar o histórico sem querer quando o
+  // DONO remove um barbeiro individual (removerBarbeiroAction, em
+  // equipe.ts). Mas essa mesma trava barra o cascade normal de
+  // barbearias -> usuarios quando é a barbearia INTEIRA que está sendo
+  // excluída (aqui a intenção já é apagar tudo mesmo, é o que a tela de
+  // confirmação promete). Por isso apagamos os atendimentos primeiro,
+  // explicitamente, antes do cascade cuidar do resto.
+  const { error: errAtendimentos } = await db
+    .from("atendimentos")
+    .delete()
+    .eq("barbearia_id", barbeariaId);
+  if (errAtendimentos) return { error: "Não foi possível excluir a barbearia." };
+
+  // barbearia_id em cascata nas demais tabelas (ver 0001_init.sql) — apagar
+  // a barbearia já leva junto usuários, serviços, consumos, etc.
+  const { error } = await db.from("barbearias").delete().eq("id", barbeariaId);
   if (error) return { error: "Não foi possível excluir a barbearia." };
 
   revalidatePath("/admin");
