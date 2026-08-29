@@ -17,6 +17,23 @@ export interface Consumo {
   estoque: number;
 }
 
+/**
+ * Confirma que o usuário da sessão atual ainda existe de verdade no banco.
+ * O JWT do Auth.js continua "válido" (assinatura bate) mesmo depois de a
+ * conta (ou a barbearia inteira, via cascade) ser excluída — sem essa
+ * checagem, quem tinha sessão aberta numa conta removida cai silenciosamente
+ * no onboarding de uma barbearia fantasma em vez de ser desconectado.
+ */
+export async function usuarioDaSessaoExiste(usuarioId: string): Promise<boolean> {
+  const { data, error } = await (await supabaseScoped())
+    .from("usuarios")
+    .select("id")
+    .eq("id", usuarioId)
+    .maybeSingle();
+  if (error) return false;
+  return !!data;
+}
+
 export async function getServicos(barbeariaId: string): Promise<Servico[]> {
   const { data, error } = await (await supabaseScoped())
     .from("servicos")

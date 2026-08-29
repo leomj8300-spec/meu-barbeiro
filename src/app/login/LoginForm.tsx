@@ -7,12 +7,15 @@ import { IconScissors, IconMail, IconLock } from "@/components/icons";
 export function LoginForm({
   barbeariaId,
   nomeBarbearia,
+  erroInicial,
 }: {
   barbeariaId?: string;
   nomeBarbearia?: string;
+  erroInicial?: string | null;
 }) {
   const [state, formAction, pending] = useActionState(loginAction, { error: null });
   const [verSenha, setVerSenha] = useState(false);
+  const erro = state.error ?? erroInicial;
 
   return (
     <div className="min-h-dvh flex items-center justify-center p-5">
@@ -29,9 +32,9 @@ export function LoginForm({
         <h1 className="heading-display text-[32px] text-text mb-2">Bom te ver de volta</h1>
         <p className="text-text-dim text-[15px] mb-9">Entre para registrar os atendimentos de hoje.</p>
 
-        {state.error && (
+        {erro && (
           <div className="bg-danger/10 border border-danger text-danger text-xs px-2.5 py-2 mb-5 rounded-[10px]">
-            {state.error}
+            {erro}
           </div>
         )}
 

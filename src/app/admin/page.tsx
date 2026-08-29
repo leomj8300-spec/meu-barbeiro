@@ -28,7 +28,7 @@ export default async function AdminPage() {
 
   return (
     <div className="min-h-dvh flex flex-col">
-      <header className="border-b border-border">
+      <header className="border-b border-border" style={{ paddingTop: "env(safe-area-inset-top)" }}>
         <div className="max-w-[720px] mx-auto w-full px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
           <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-text-dim">
             Meu Barbeiro · Admin

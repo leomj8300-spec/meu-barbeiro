@@ -1,11 +1,19 @@
+import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { getConfiguracoes, getTicketAtual } from "@/lib/queries";
+import { getConfiguracoes, getTicketAtual, usuarioDaSessaoExiste } from "@/lib/queries";
 import { CONFIGURACOES_PADRAO } from "@/lib/types";
 import { AppShell } from "./AppShell";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   if (!session?.user) return null; // proxy.ts já redireciona pra /login
+
+  // O JWT continua "válido" (assinatura bate) mesmo depois de a conta ou a
+  // barbearia inteira serem excluídas — sem essa checagem, cai silenciosamente
+  // no onboarding de uma barbearia fantasma em vez de ser desconectado.
+  if (!(await usuarioDaSessaoExiste(session.user.id))) {
+    redirect("/api/sessao-invalida");
+  }
 
   const [configuracoes, ticketAtual] = await Promise.all([
     getConfiguracoes(session.user.barbeariaId),

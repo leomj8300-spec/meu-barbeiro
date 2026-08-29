@@ -1,12 +1,19 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { getConfiguracoes } from "@/lib/queries";
+import { getConfiguracoes, usuarioDaSessaoExiste } from "@/lib/queries";
 import { IconScissors } from "@/components/icons";
 import { OnboardingWizard } from "./OnboardingWizard";
 
 export default async function OnboardingPage() {
   const session = await auth();
   if (!session?.user) return null;
+
+  // Mesma checagem de (app)/layout.tsx: um JWT de dono continua "válido"
+  // mesmo depois da barbearia ter sido excluída — sem isso, cai no
+  // onboarding de uma barbearia fantasma em vez de ser desconectado.
+  if (!(await usuarioDaSessaoExiste(session.user.id))) {
+    redirect("/api/sessao-invalida");
+  }
 
   if (session.user.papel !== "dono") {
     redirect("/atendimento");

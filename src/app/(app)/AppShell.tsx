@@ -64,7 +64,7 @@ export function AppShell({
 
   return (
     <div className="min-h-dvh flex flex-col">
-      <header className="border-b border-border">
+      <header className="border-b border-border" style={{ paddingTop: "env(safe-area-inset-top)" }}>
         <div className="max-w-[720px] mx-auto w-full px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
           <Link href="/atendimento" className="flex items-center gap-2.5 shrink-0">
             <span className="w-9 h-9 rounded-[10px] bg-accent text-on-accent flex items-center justify-center shrink-0">
