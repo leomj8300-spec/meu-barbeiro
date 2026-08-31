@@ -14,6 +14,7 @@ import {
 } from "@/components/icons";
 import { logoutAction } from "@/app/actions/auth";
 import { SuporteChat } from "@/components/SuporteChat";
+import { NavPendingDot } from "@/components/NavPendingDot";
 import type { BarbeariaConfiguracoes, Papel } from "@/lib/types";
 import type { MensagemTicketSuporte } from "@/lib/queries";
 
@@ -119,7 +120,7 @@ export function AppShell({
                   key={f.href}
                   href={f.href}
                   onClick={() => setMaisAberto(false)}
-                  className={`flex items-center gap-2 px-3 py-2.5 border rounded-[10px] text-xs font-semibold ${
+                  className={`relative flex items-center gap-2 px-3 py-2.5 border rounded-[10px] text-xs font-semibold ${
                     ativo
                       ? "border-accent text-accent-label bg-accent-soft"
                       : "border-border text-text-dim"
@@ -127,6 +128,7 @@ export function AppShell({
                 >
                   <Icon className="w-4 h-4 shrink-0" />
                   {f.label}
+                  <NavPendingDot />
                 </Link>
               );
             })}
@@ -146,7 +148,7 @@ export function AppShell({
               <Link
                 key={tab.href}
                 href={tab.href}
-                className="flex flex-col items-center gap-1 py-2.5 text-[10.5px] font-semibold"
+                className="relative flex flex-col items-center gap-1 py-2.5 text-[10.5px] font-semibold"
               >
                 <span
                   className={`w-9 h-5 rounded-full flex items-center justify-center ${
@@ -156,6 +158,7 @@ export function AppShell({
                   <Icon className="w-4.5 h-4.5" />
                 </span>
                 <span className={ativo ? "text-accent-label" : "text-text-dim"}>{tab.label}</span>
+                <NavPendingDot />
               </Link>
             );
           })}
