@@ -145,6 +145,32 @@ export function IconHelp(props: IconProps) {
   );
 }
 
+export function IconSun(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="12" cy="12" r="4.2" />
+      <path d="M12 3 V5.2 M12 18.8 V21 M3 12 H5.2 M18.8 12 H21 M5.6 5.6 L7.2 7.2 M16.8 16.8 L18.4 18.4 M18.4 5.6 L16.8 7.2 M7.2 16.8 L5.6 18.4" />
+    </svg>
+  );
+}
+
+export function IconMoon(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <path d="M19.5 14.3 C17.9 15.3 16.1 15.8 14.2 15.5 C10.3 14.9 7.6 11.3 8.2 7.4 C8.4 6.1 8.9 4.9 9.7 3.9 C6 4.7 3.3 8 3.3 12 C3.3 16.7 7.1 20.5 11.8 20.5 C15.4 20.5 18.5 18.2 19.7 15 C19.6 14.8 19.6 14.5 19.5 14.3 Z" />
+    </svg>
+  );
+}
+
+export function IconContrast(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 3.5 A8.5 8.5 0 0 1 12 20.5 Z" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
 export function IconSearch(props: IconProps) {
   return (
     <svg {...base} {...props}>

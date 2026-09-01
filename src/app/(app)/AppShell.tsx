@@ -11,6 +11,7 @@ import {
   IconUsers,
   IconHistory,
   IconDoor,
+  IconContrast,
 } from "@/components/icons";
 import { logoutAction } from "@/app/actions/auth";
 import { SuporteChat } from "@/components/SuporteChat";
@@ -21,8 +22,24 @@ import type { MensagemTicketSuporte } from "@/lib/queries";
 interface Tab {
   href: string;
   label: string;
-  icon: (props: { className?: string }) => React.ReactElement;
+  icon: (props: { className?: string; strokeWidth?: number }) => React.ReactElement;
+  categoria?: Categoria;
 }
+
+/**
+ * A cor da aba de baixo tem sentido, não é decoração: dourado onde entra
+ * dinheiro, âmbar onde falta receber, neutro onde é só consulta — só a aba
+ * ATIVA acende na cor da categoria (inativa fica sempre no mesmo tom
+ * apagado, ver render abaixo), pra reconhecer a seção pela cor antes de ler
+ * a palavra.
+ */
+type Categoria = "dinheiro" | "pendencia" | "neutro";
+
+const CATEGORIA_CLASSE: Record<Categoria, string> = {
+  dinheiro: "text-tab-money",
+  pendencia: "text-warn",
+  neutro: "text-ink-text",
+};
 
 export function AppShell({
   nome,
@@ -41,19 +58,21 @@ export function AppShell({
   const [maisAberto, setMaisAberto] = useState(false);
 
   const tabs: Tab[] = [
-    { href: "/atendimento", label: "Atender", icon: IconScissors },
-    { href: "/historico", label: "Histórico", icon: IconHistory },
+    { href: "/atendimento", label: "Atender", icon: IconScissors, categoria: "dinheiro" },
+    { href: "/historico", label: "Histórico", icon: IconHistory, categoria: "neutro" },
   ];
-  if (config.fiadoHabilitado) tabs.push({ href: "/fiado", label: "Fiado", icon: IconTagClock });
+  if (config.fiadoHabilitado) {
+    tabs.push({ href: "/fiado", label: "Fiado", icon: IconTagClock, categoria: "pendencia" });
+  }
   // Caixa (fechamento+caixinha+comissão) é sempre relevante pro dono; pro
   // barbeiro só existe se sobrar algo pessoal pra ver ali (a própria página
   // já redireciona se não sobrar nada, então a aba segue a mesma regra).
   if (papel === "dono" || config.caixinhaHabilitada || config.comissaoHabilitada) {
-    tabs.push({ href: "/caixa", label: "Caixa", icon: IconCoin });
+    tabs.push({ href: "/caixa", label: "Caixa", icon: IconCoin, categoria: "dinheiro" });
   }
 
-  const ferramentas: Tab[] =
-    papel === "dono"
+  const ferramentas: Tab[] = [
+    ...(papel === "dono"
       ? [
           { href: "/servicos-consumos", label: "Serviços e consumos", icon: IconScissors },
           ...(config.gestaoEquipeHabilitada
@@ -61,7 +80,9 @@ export function AppShell({
             : []),
           { href: "/configuracoes", label: "Configurações", icon: IconSliders },
         ]
-      : [{ href: "/configuracoes", label: "Configurações", icon: IconSliders }];
+      : []),
+    { href: "/aparencia", label: "Aparência", icon: IconContrast },
+  ];
 
   return (
     <div className="min-h-dvh flex flex-col">
@@ -136,14 +157,19 @@ export function AppShell({
         </div>
       )}
 
+      {/* Superfície "ink" fixa, igual a barra de total e o cabeçalho de
+          login — não muda com tema claro/escuro. Só a aba ATIVA acende na
+          cor da categoria (dinheiro/pendência/neutro); inativa fica sempre
+          no mesmo tom apagado, pra não virar ruído visual. */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-panel"
+        className="fixed bottom-0 left-0 right-0 z-50 bg-ink"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         <div className="max-w-[720px] mx-auto w-full grid" style={{ gridTemplateColumns: `repeat(${tabs.length + (ferramentas.length > 0 ? 1 : 0)}, 1fr)` }}>
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const ativo = pathname === tab.href;
+            const corAtiva = CATEGORIA_CLASSE[tab.categoria ?? "neutro"];
             return (
               <Link
                 key={tab.href}
@@ -152,12 +178,12 @@ export function AppShell({
               >
                 <span
                   className={`w-9 h-5 rounded-full flex items-center justify-center ${
-                    ativo ? "bg-accent-soft text-accent-label" : "text-text-dim"
+                    ativo ? `bg-white/10 ${corAtiva}` : "text-ink-text-dim"
                   }`}
                 >
-                  <Icon className="w-4.5 h-4.5" />
+                  <Icon className="w-4.5 h-4.5" strokeWidth={ativo ? 2.1 : 1.7} />
                 </span>
-                <span className={ativo ? "text-accent-label" : "text-text-dim"}>{tab.label}</span>
+                <span className={ativo ? corAtiva : "text-ink-text-dim"}>{tab.label}</span>
                 <NavPendingDot />
               </Link>
             );
@@ -170,12 +196,12 @@ export function AppShell({
             >
               <span
                 className={`w-9 h-5 rounded-full flex items-center justify-center ${
-                  maisAberto ? "bg-accent-soft text-accent-label" : "text-text-dim"
+                  maisAberto ? "bg-white/10 text-ink-text" : "text-ink-text-dim"
                 }`}
               >
-                <IconSliders className="w-4.5 h-4.5" />
+                <IconSliders className="w-4.5 h-4.5" strokeWidth={maisAberto ? 2.1 : 1.7} />
               </span>
-              <span className={maisAberto ? "text-accent-label" : "text-text-dim"}>Mais</span>
+              <span className={maisAberto ? "text-ink-text" : "text-ink-text-dim"}>Mais</span>
             </button>
           )}
         </div>

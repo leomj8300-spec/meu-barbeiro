@@ -1,7 +1,7 @@
 import { cache } from "react";
 import { supabaseScoped } from "@/lib/supabase/scoped";
 import type { BarbeariaConfiguracoes } from "@/lib/types";
-import { TEMA_PADRAO, type TemaCor } from "@/lib/theme";
+import { TEMA_PADRAO, type TemaCor, type TemaModo } from "@/lib/theme";
 
 export interface Servico {
   id: string;
@@ -450,6 +450,7 @@ export async function getHistoricoFechamentos(barbeariaId: string): Promise<Fech
 
 export interface PreferenciasTema {
   temaCor: TemaCor;
+  temaModo: TemaModo;
 }
 
 /**
@@ -463,12 +464,12 @@ export const getPreferenciasTema = cache(async function getPreferenciasTema(
 ): Promise<PreferenciasTema> {
   const { data, error } = await (await supabaseScoped())
     .from("usuarios")
-    .select("tema_cor")
+    .select("tema_cor, tema_modo")
     .eq("id", userId)
     .single();
   if (error || !data) return TEMA_PADRAO;
 
-  return { temaCor: data.tema_cor as TemaCor };
+  return { temaCor: data.tema_cor as TemaCor, temaModo: data.tema_modo as TemaModo };
 });
 
 /**

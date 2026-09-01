@@ -2,10 +2,12 @@
 
 /* ==========================================================================
    Paleta — preto/branco quente (documento "Exploração Visual — Barbearia").
-   Um único modo, sempre claro — a personalização por usuário é só a cor de
-   destaque. Accent (4 tokens) é resolvido no servidor a partir de tema_cor
-   do usuário logado e injetado inline pelo layout raiz; os valores abaixo em
-   :root são só o fallback (tema "neutro") pra antes disso existir/visitante.
+   Tema claro/escuro/automático por usuário (tema_modo) + cor de destaque
+   (tema_cor). Ambos são resolvidos no servidor e injetados inline pelo
+   layout raiz (ver src/app/layout.tsx e src/lib/theme.ts) — os valores
+   abaixo em :root são só o fallback (claro + "neutro") pra antes disso
+   existir/visitante sem sessão. O bloco :root[data-theme="dark"] espelha
+   cada token pro tema escuro.
    ========================================================================== */
 
 :root {
@@ -19,7 +21,8 @@
   --color-text-dim: #57544E;
 
   /* Superfície estrutural sempre quase-preta (barra de total, cabeçalho de
-     login) — um contraste fixo, não liga com a cor de destaque. */
+     login, barra de navegação de baixo) — um contraste fixo, não liga com
+     tema claro/escuro nem com a cor de destaque. */
   --color-ink: #0E0E0E;
   --color-ink-text: #FAFAF8;
   --color-ink-text-dim: #8A867E;
@@ -37,6 +40,28 @@
   --color-cons: #3F7A32;
   --color-danger: #C6362B;
   --color-warn: #A9700B;
+
+  /* Aba "dinheiro" (Atender/Caixa) da barra de baixo, só quando ativa — fixo,
+     não liga com tema nem accent (igual serv/cons/danger/warn). */
+  --color-tab-money: #E0A526;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-bg: #131211;
+  --color-panel: #1B1A18;
+  --color-panel-2: #232220;
+  --color-border: #363430;
+  --color-text: #F2F0EA;
+  --color-text-dim: #A19C92;
+
+  --color-serv: #C9A24E;
+  --color-cons: #6FBF7F;
+  --color-danger: #E5766D;
+  --color-warn: #D6A24A;
+
+  --color-tab-money: #F0BE4E;
 }
 
 @theme inline {
@@ -64,6 +89,7 @@
   --color-cons: var(--color-cons);
   --color-danger: var(--color-danger);
   --color-warn: var(--color-warn);
+  --color-tab-money: var(--color-tab-money);
 
   --font-sans: var(--font-archivo);
   --font-mono: var(--font-ibm-plex-mono);

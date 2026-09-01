@@ -4,10 +4,11 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { supabaseScoped } from "@/lib/supabase/scoped";
-import { TEMA_CORES } from "@/lib/theme";
+import { TEMA_CORES, TEMA_MODOS } from "@/lib/theme";
 
 const preferenciasSchema = z.object({
   temaCor: z.enum(TEMA_CORES),
+  temaModo: z.enum(TEMA_MODOS),
 });
 
 export type PreferenciasInput = z.infer<typeof preferenciasSchema>;
@@ -25,7 +26,7 @@ export async function salvarPreferenciasTemaAction(
 
   const { error } = await (await supabaseScoped())
     .from("usuarios")
-    .update({ tema_cor: parsed.data.temaCor })
+    .update({ tema_cor: parsed.data.temaCor, tema_modo: parsed.data.temaModo })
     .eq("id", session.user.id);
 
   if (error) {
