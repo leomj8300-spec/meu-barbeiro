@@ -3,11 +3,8 @@
 import { useState, useTransition, useRef, useEffect } from "react";
 import { IconHelp, IconDoor } from "@/components/icons";
 import { enviarMensagemAction, confirmarAcaoAction } from "@/app/actions/suporte";
+import { fmtHora } from "@/lib/formato";
 import type { MensagemTicketSuporte } from "@/lib/queries";
-
-function fmtHora(iso: string) {
-  return new Date(iso).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-}
 
 export function SuporteChat({
   ticketInicial,

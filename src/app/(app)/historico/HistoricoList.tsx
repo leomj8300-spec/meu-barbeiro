@@ -2,33 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { IconSearch } from "@/components/icons";
+import { fmtMoeda as fmt, fmtHora, chaveDia, rotuloDia } from "@/lib/formato";
 import type { AtendimentoHistorico } from "@/lib/queries";
-
-function fmt(v: number) {
-  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
-
-function fmtHora(iso: string) {
-  return new Date(iso).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-}
-
-const MESES = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
-
-function chaveDia(iso: string) {
-  const d = new Date(iso);
-  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
-}
-
-function rotuloDia(iso: string) {
-  const d = new Date(iso);
-  const hoje = new Date();
-  const ontem = new Date(hoje);
-  ontem.setDate(hoje.getDate() - 1);
-  const data = `${String(d.getDate()).padStart(2, "0")} ${MESES[d.getMonth()]}`;
-  if (chaveDia(iso) === chaveDia(hoje.toISOString())) return `Hoje · ${data}`;
-  if (chaveDia(iso) === chaveDia(ontem.toISOString())) return `Ontem · ${data}`;
-  return data;
-}
 
 const FILTROS = ["Todos", "Pagos", "Fiado"] as const;
 type Filtro = (typeof FILTROS)[number];

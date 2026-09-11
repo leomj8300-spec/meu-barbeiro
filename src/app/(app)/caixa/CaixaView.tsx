@@ -14,18 +14,7 @@ import type {
   CaixinhaPorBarbeiro,
   ComissaoPorBarbeiro,
 } from "@/lib/queries";
-
-function fmt(v: number) {
-  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
-
-function fmtData(iso: string) {
-  return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
-}
-
-function fmtDataHora(iso: string) {
-  return new Date(iso).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
-}
+import { fmtMoeda as fmt, fmtData, fmtDataHora } from "@/lib/formato";
 
 export function CaixaView({
   ehDono,

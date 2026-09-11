@@ -7,6 +7,7 @@ import { logoutAdminAction } from "@/app/actions/admin";
 import { IconDoor } from "@/components/icons";
 import { AdminTabs } from "../AdminTabs";
 import { AtivarAvisos } from "../AtivarAvisos";
+import { fmtDataHora as fmtData } from "@/lib/formato";
 
 const STATUS_LABEL: Record<string, { texto: string; classe: string }> = {
   aberto: { texto: "Em conversa", classe: "text-text-dim border-border bg-panel-2" },
@@ -15,10 +16,6 @@ const STATUS_LABEL: Record<string, { texto: string; classe: string }> = {
   recusado: { texto: "Recusado", classe: "text-danger border-danger/40 bg-danger/10" },
   fechado: { texto: "Fechado", classe: "text-text-dim border-border bg-panel-2" },
 };
-
-function fmtData(iso: string) {
-  return new Date(iso).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
-}
 
 export default async function RelatoriosPage() {
   const cookieStore = await cookies();

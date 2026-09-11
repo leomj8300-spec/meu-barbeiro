@@ -3,12 +3,9 @@
 import { useMemo, useState, useTransition } from "react";
 import { registrarAtendimentoAction } from "@/app/actions/atendimento";
 import { IconUser } from "@/components/icons";
+import { fmtMoeda as fmt } from "@/lib/formato";
 import type { Servico, Consumo } from "@/lib/queries";
 import type { BarbeariaConfiguracoes } from "@/lib/types";
-
-function fmt(v: number) {
-  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
 
 export function AtendimentoForm({
   servicos,

@@ -6,11 +6,8 @@ import {
   atualizarServicoAction,
   excluirServicoAction,
 } from "@/app/actions/catalogo";
+import { fmtMoeda as fmt } from "@/lib/formato";
 import type { Servico } from "@/lib/queries";
-
-function fmt(v: number) {
-  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
 
 export function ServicosManager({ servicos }: { servicos: Servico[] }) {
   const [error, setError] = useState<string | null>(null);

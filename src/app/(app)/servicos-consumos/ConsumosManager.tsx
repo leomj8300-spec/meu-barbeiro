@@ -7,11 +7,8 @@ import {
   ajustarEstoqueAction,
   excluirConsumoAction,
 } from "@/app/actions/catalogo";
+import { fmtMoeda as fmt } from "@/lib/formato";
 import type { Consumo } from "@/lib/queries";
-
-function fmt(v: number) {
-  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
 
 export function ConsumosManager({ consumos }: { consumos: Consumo[] }) {
   const [error, setError] = useState<string | null>(null);

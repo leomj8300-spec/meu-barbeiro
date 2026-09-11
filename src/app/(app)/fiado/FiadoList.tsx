@@ -2,26 +2,13 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { marcarComoPagoAction, marcarClienteComoPagoAction } from "@/app/actions/fiado";
+import { fmtMoeda as fmt, fmtDataHora as fmtData, diasDesde } from "@/lib/formato";
 import type { AtendimentoPendente } from "@/lib/queries";
-
-function fmt(v: number) {
-  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
-
-function fmtData(iso: string) {
-  return new Date(iso).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
-}
 
 function iniciais(nome: string) {
   const partes = nome.trim().split(/\s+/);
   const letras = partes.length > 1 ? [partes[0][0], partes[partes.length - 1][0]] : [partes[0]?.[0] ?? ""];
   return letras.join("").toUpperCase();
-}
-
-function diasDesde(iso: string) {
-  const dias = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 86400000));
-  if (dias === 0) return "hoje";
-  return dias === 1 ? "1 dia" : `${dias} dias`;
 }
 
 export function FiadoList({
