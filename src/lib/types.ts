@@ -11,6 +11,12 @@ export interface Usuario {
 
 export type PeriodicidadeFechamento = "semanal" | "quinzenal" | "mensal";
 
+/**
+ * Como a barbearia atende. São exclusivos: marcando hora, todo atendimento
+ * nasce de um agendamento (inclusive o encaixe de quem chega sem marcar).
+ */
+export type ModoAtendimento = "ordem_chegada" | "agendamento";
+
 export interface BarbeariaConfiguracoes {
   fiadoHabilitado: boolean;
   caixinhaHabilitada: boolean;
@@ -20,6 +26,12 @@ export interface BarbeariaConfiguracoes {
   gestaoEquipeHabilitada: boolean;
   periodicidadeFechamento: PeriodicidadeFechamento;
   diaInicioPeriodo: number;
+  modoAtendimento: ModoAtendimento;
+  /** "09:00" — hora local da barbearia. */
+  horaAbertura: string;
+  horaFechamento: string;
+  /** 1=segunda .. 7=domingo */
+  diasFuncionamento: number[];
 }
 
 export const CONFIGURACOES_PADRAO: BarbeariaConfiguracoes = {
@@ -31,4 +43,8 @@ export const CONFIGURACOES_PADRAO: BarbeariaConfiguracoes = {
   gestaoEquipeHabilitada: false,
   periodicidadeFechamento: "semanal",
   diaInicioPeriodo: 1,
+  modoAtendimento: "ordem_chegada",
+  horaAbertura: "09:00",
+  horaFechamento: "19:00",
+  diasFuncionamento: [1, 2, 3, 4, 5, 6],
 };

@@ -171,6 +171,17 @@ export function IconContrast(props: IconProps) {
   );
 }
 
+export function IconCalendar(props: IconProps) {
+  return (
+    <svg {...base} {...props}>
+      <rect x="3.5" y="5" width="17" height="16" rx="2.5" />
+      <path d="M3.5 9.5 H20.5" />
+      <path d="M8 3.5 V6.5 M16 3.5 V6.5" />
+      <path d="M7.5 13.5 H10 M14 13.5 H16.5 M7.5 17 H10 M14 17 H16.5" strokeWidth={1.4} />
+    </svg>
+  );
+}
+
 export function IconSearch(props: IconProps) {
   return (
     <svg {...base} {...props}>

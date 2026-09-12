@@ -29,6 +29,8 @@ const registrarAtendimentoSchema = z.object({
   valor: z.number().nonnegative(),
   precoNegociado: z.boolean(),
   fiado: z.boolean(),
+  /** Presente quando o atendimento nasceu de um horário marcado. */
+  agendamentoId: z.string().uuid().optional(),
 });
 
 export type RegistrarAtendimentoInput = z.infer<typeof registrarAtendimentoSchema>;
@@ -53,7 +55,14 @@ export async function registrarAtendimentoAction(
     return { error: "Selecione ao menos um serviço ou consumo." };
   }
 
-  const { error } = await (await supabaseScoped()).rpc("registrar_atendimento", {
+  // Marcando hora, todo atendimento nasce de um agendamento (o encaixe de quem
+  // chega sem marcar também vira um). A trava fica aqui, no servidor, e não só
+  // na tela — senão bastaria abrir /atendimento direto pra furar a agenda.
+  if (configuracoes.modoAtendimento === "agendamento" && !parsed.data.agendamentoId) {
+    return { error: "Nesse modo, o atendimento precisa sair de um horário marcado." };
+  }
+
+  const { data: atendimentoId, error } = await (await supabaseScoped()).rpc("registrar_atendimento", {
     p_barbearia_id: session.user.barbeariaId,
     p_barbeiro_id: session.user.id,
     p_cliente: cliente,
@@ -76,6 +85,18 @@ export async function registrarAtendimentoAction(
       mensagem: error.message,
     });
     return { error: "Não foi possível registrar o atendimento." };
+  }
+
+  if (parsed.data.agendamentoId) {
+    // O atendimento já está gravado; se marcar como atendido falhar, o cliente
+    // continua aparecendo como "marcado" na agenda. Chato, mas não perde
+    // dinheiro nem duplica registro — por isso não desfaz o atendimento.
+    await (await supabaseScoped())
+      .from("agendamentos")
+      .update({ status: "atendido", atendimento_id: atendimentoId })
+      .eq("id", parsed.data.agendamentoId)
+      .eq("barbearia_id", session.user.barbeariaId);
+    revalidatePath("/agenda");
   }
 
   revalidatePath("/atendimento");

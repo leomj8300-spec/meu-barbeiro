@@ -185,6 +185,12 @@ export async function confirmarAcaoAction(
         caixinhaHabilitada: recurso === "caixinha" ? ligado : atual.caixinhaHabilitada,
         periodicidadeFechamento: atual.periodicidadeFechamento,
         diaInicioPeriodo: atual.diaInicioPeriodo,
+        // A IA não mexe no modo de atendimento nem no horário: trocar isso
+        // reorganiza o dia inteiro da barbearia, é decisão do dono na tela.
+        modoAtendimento: atual.modoAtendimento,
+        horaAbertura: atual.horaAbertura,
+        horaFechamento: atual.horaFechamento,
+        diasFuncionamento: atual.diasFuncionamento,
       };
       resultado = await salvarConfiguracoesAction(novaConfig);
       break;

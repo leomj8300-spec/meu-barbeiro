@@ -1,12 +1,13 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { getServicos, getConsumos, getConfiguracoes } from "@/lib/queries";
+import { getServicos, getConsumos, getConfiguracoes, getAgendamento } from "@/lib/queries";
 import { CONFIGURACOES_PADRAO } from "@/lib/types";
+import { fmtHora } from "@/lib/formato";
 import { PageHeading } from "@/components/PageHeading";
 import { IconScissors } from "@/components/icons";
 import { AtendimentoForm } from "./AtendimentoForm";
 
-export default async function AtendimentoPage() {
+export default async function AtendimentoPage({ searchParams }: PageProps<"/atendimento">) {
   const session = await auth();
   if (!session?.user) return null; // proxy.ts já redireciona pra /login
 
@@ -24,14 +25,38 @@ export default async function AtendimentoPage() {
   const config = configuracoes ?? CONFIGURACOES_PADRAO;
   const consumos = config.controleEstoqueHabilitado ? todosConsumos : [];
 
+  // Marcando hora, essa tela só existe como o segundo passo do agendamento —
+  // chegar aqui sem um horário na mão significa que o caminho foi furado.
+  const params = await searchParams;
+  const agendamentoId = typeof params.agendamento === "string" ? params.agendamento : undefined;
+  const agendando = config.modoAtendimento === "agendamento";
+  if (agendando && !agendamentoId) redirect("/agenda");
+
+  const agendamento = agendamentoId
+    ? await getAgendamento(session.user.barbeariaId, agendamentoId)
+    : null;
+  if (agendando && !agendamento) redirect("/agenda");
+  if (agendamento && agendamento.status !== "marcado") redirect("/agenda");
+
   return (
     <>
       <PageHeading
         title="Atendimento"
-        subtitle="Registrar corte e consumos"
+        subtitle={
+          agendamento
+            ? `${fmtHora(agendamento.inicio)} · ${agendamento.cliente}`
+            : "Registrar corte e consumos"
+        }
         icon={<IconScissors className="w-5 h-5" />}
       />
-      <AtendimentoForm servicos={servicos} consumos={consumos} config={config} />
+      <AtendimentoForm
+        servicos={servicos}
+        consumos={consumos}
+        config={config}
+        agendamentoId={agendamento?.id}
+        clienteInicial={agendamento?.cliente}
+        servicosIniciais={agendamento?.servicos.map((s) => s.servicoId)}
+      />
     </>
   );
 }

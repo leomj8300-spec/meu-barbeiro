@@ -8,6 +8,8 @@ export interface Servico {
   nome: string;
   preco: number;
   comissionavel: boolean;
+  /** Quanto tempo ocupa a cadeira — é o que permite montar a agenda. */
+  duracaoMin: number;
 }
 
 export interface Consumo {
@@ -37,11 +39,17 @@ export async function usuarioDaSessaoExiste(usuarioId: string): Promise<boolean>
 export async function getServicos(barbeariaId: string): Promise<Servico[]> {
   const { data, error } = await (await supabaseScoped())
     .from("servicos")
-    .select("id, nome, preco, comissionavel")
+    .select("id, nome, preco, comissionavel, duracao_min")
     .eq("barbearia_id", barbeariaId)
     .order("nome");
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []).map((s) => ({
+    id: s.id,
+    nome: s.nome,
+    preco: s.preco,
+    comissionavel: s.comissionavel,
+    duracaoMin: s.duracao_min,
+  }));
 }
 
 export async function getConsumos(barbeariaId: string): Promise<Consumo[]> {
@@ -482,7 +490,7 @@ export const getConfiguracoes = cache(async function getConfiguracoes(
   const { data, error } = await (await supabaseScoped())
     .from("barbearia_configuracoes")
     .select(
-      "fiado_habilitado, caixinha_habilitada, comissao_habilitada, comissao_padrao_pct, controle_estoque_habilitado, gestao_equipe_habilitada, periodicidade_fechamento, dia_inicio_periodo",
+      "fiado_habilitado, caixinha_habilitada, comissao_habilitada, comissao_padrao_pct, controle_estoque_habilitado, gestao_equipe_habilitada, periodicidade_fechamento, dia_inicio_periodo, modo_atendimento, hora_abertura, hora_fechamento, dias_funcionamento",
     )
     .eq("barbearia_id", barbeariaId)
     .maybeSingle();
@@ -498,6 +506,11 @@ export const getConfiguracoes = cache(async function getConfiguracoes(
     gestaoEquipeHabilitada: data.gestao_equipe_habilitada,
     periodicidadeFechamento: data.periodicidade_fechamento,
     diaInicioPeriodo: data.dia_inicio_periodo,
+    modoAtendimento: data.modo_atendimento,
+    // Postgres devolve time como "09:00:00" — a tela usa "09:00".
+    horaAbertura: String(data.hora_abertura).slice(0, 5),
+    horaFechamento: String(data.hora_fechamento).slice(0, 5),
+    diasFuncionamento: data.dias_funcionamento,
   };
 });
 
@@ -560,4 +573,122 @@ export async function getTicketAtual(
       criadoEm: m.criado_em,
     })),
   };
+}
+
+export type StatusAgendamento = "marcado" | "atendido" | "cancelado" | "faltou";
+
+export interface Agendamento {
+  id: string;
+  cliente: string;
+  telefone: string | null;
+  inicio: string;
+  duracaoMin: number;
+  status: StatusAgendamento;
+  observacao: string | null;
+  atendimentoId: string | null;
+  barbeiroId: string;
+  barbeiroNome: string;
+  servicos: { servicoId: string; nome: string; preco: number }[];
+}
+
+const SELECT_AGENDAMENTO =
+  "id, cliente, telefone, inicio, duracao_min, status, observacao, atendimento_id, barbeiro_id, barbeiro:usuarios(nome), agendamento_servicos(servico_id, nome, preco)";
+
+interface LinhaAgendamento {
+  id: string;
+  cliente: string;
+  telefone: string | null;
+  inicio: string;
+  duracao_min: number;
+  status: StatusAgendamento;
+  observacao: string | null;
+  atendimento_id: string | null;
+  barbeiro_id: string;
+  barbeiro: unknown;
+  agendamento_servicos: { servico_id: string; nome: string; preco: number }[] | null;
+}
+
+function montarAgendamento(a: LinhaAgendamento): Agendamento {
+  const barbeiro = a.barbeiro as { nome: string } | null;
+  return {
+    id: a.id,
+    cliente: a.cliente,
+    telefone: a.telefone,
+    inicio: a.inicio,
+    duracaoMin: a.duracao_min,
+    status: a.status,
+    observacao: a.observacao,
+    atendimentoId: a.atendimento_id,
+    barbeiroId: a.barbeiro_id,
+    barbeiroNome: barbeiro?.nome ?? "—",
+    servicos: (a.agendamento_servicos ?? []).map((s) => ({
+      servicoId: s.servico_id,
+      nome: s.nome,
+      preco: Number(s.preco),
+    })),
+  };
+}
+
+/**
+ * Agenda de um dia, em ordem de horário. Cancelados entram junto — a tela
+ * mostra o horário como vago, mas quem cancelou continua visível (o barbeiro
+ * precisa saber que aquele cliente desmarcou, não que nunca marcou).
+ *
+ * `dia` no formato "2026-09-11" (dia do calendário em São Paulo).
+ * Sem barbeiroId: barbearia inteira (visão do dono). Com: só daquele barbeiro.
+ */
+export async function getAgendamentosDoDia(
+  barbeariaId: string,
+  dia: string,
+  barbeiroId?: string,
+): Promise<Agendamento[]> {
+  // O dia da barbearia vai das 00h às 24h em São Paulo (UTC-3), que em UTC
+  // é 03:00 do mesmo dia até 03:00 do dia seguinte.
+  const inicioDia = new Date(`${dia}T00:00:00-03:00`).toISOString();
+  const fimDia = new Date(`${dia}T23:59:59.999-03:00`).toISOString();
+
+  let query = (await supabaseScoped())
+    .from("agendamentos")
+    .select(SELECT_AGENDAMENTO)
+    .eq("barbearia_id", barbeariaId)
+    .gte("inicio", inicioDia)
+    .lte("inicio", fimDia)
+    .order("inicio");
+
+  if (barbeiroId) query = query.eq("barbeiro_id", barbeiroId);
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data ?? []).map((a) => montarAgendamento(a as unknown as LinhaAgendamento));
+}
+
+export async function getAgendamento(
+  barbeariaId: string,
+  agendamentoId: string,
+): Promise<Agendamento | null> {
+  const { data, error } = await (await supabaseScoped())
+    .from("agendamentos")
+    .select(SELECT_AGENDAMENTO)
+    .eq("barbearia_id", barbeariaId)
+    .eq("id", agendamentoId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+  return montarAgendamento(data as unknown as LinhaAgendamento);
+}
+
+/**
+ * Quem pode receber um agendamento: os barbeiros e também o dono, que atende
+ * na cadeira como qualquer um (mesma premissa de getComissoes).
+ */
+export async function getAtendentes(
+  barbeariaId: string,
+): Promise<{ id: string; nome: string }[]> {
+  const { data, error } = await (await supabaseScoped())
+    .from("usuarios")
+    .select("id, nome")
+    .eq("barbearia_id", barbeariaId)
+    .order("nome");
+  if (error) throw error;
+  return data ?? [];
 }

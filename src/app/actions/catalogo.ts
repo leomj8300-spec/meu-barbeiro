@@ -28,7 +28,21 @@ const servicoSchema = z.object({
   nome: z.string().trim().min(1, "Informe o nome do serviço."),
   preco: z.number().nonnegative(),
   comissionavel: z.boolean(),
+  duracaoMin: z
+    .number()
+    .int()
+    .min(5, "A duração mínima é 5 minutos.")
+    .max(480, "A duração máxima é 8 horas."),
 });
+
+function colunasServico(d: z.infer<typeof servicoSchema>) {
+  return {
+    nome: d.nome,
+    preco: d.preco,
+    comissionavel: d.comissionavel,
+    duracao_min: d.duracaoMin,
+  };
+}
 
 export async function criarServicoAction(
   input: z.infer<typeof servicoSchema>,
@@ -41,7 +55,7 @@ export async function criarServicoAction(
 
   const { error } = await (await supabaseScoped())
     .from("servicos")
-    .insert({ barbearia_id: auth_.barbeariaId, ...parsed.data });
+    .insert({ barbearia_id: auth_.barbeariaId, ...colunasServico(parsed.data) });
   if (error) return { error: "Não foi possível criar o serviço." };
 
   revalidatePath("/servicos-consumos");
@@ -60,7 +74,7 @@ export async function atualizarServicoAction(
 
   const { data, error } = await (await supabaseScoped())
     .from("servicos")
-    .update(parsed.data)
+    .update(colunasServico(parsed.data))
     .eq("id", input.id)
     .eq("barbearia_id", auth_.barbeariaId)
     .select("id");

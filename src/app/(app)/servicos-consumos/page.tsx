@@ -30,7 +30,10 @@ export default async function ServicosConsumosPage() {
     <>
       <PageHeading title="Serviços e consumos" subtitle="Cadastro e preços" icon={<IconScissors className="w-5 h-5" />} />
       <div className="flex flex-col gap-6">
-        <ServicosManager servicos={servicos} />
+        <ServicosManager
+          servicos={servicos}
+          mostrarDuracao={config.modoAtendimento === "agendamento"}
+        />
         {config.controleEstoqueHabilitado && <ConsumosManager consumos={consumos} />}
       </div>
     </>

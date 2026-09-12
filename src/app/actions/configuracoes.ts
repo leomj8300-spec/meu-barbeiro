@@ -22,11 +22,21 @@ const configuracoesSchema = z
       .int()
       .min(1, "Dia inválido.")
       .max(31, "Dia inválido."),
+    modoAtendimento: z.enum(["ordem_chegada", "agendamento"]),
+    horaAbertura: z.string().regex(/^\d{2}:\d{2}$/, "Horário de abertura inválido."),
+    horaFechamento: z.string().regex(/^\d{2}:\d{2}$/, "Horário de fechamento inválido."),
+    diasFuncionamento: z
+      .array(z.number().int().min(1, "Dia inválido.").max(7, "Dia inválido."))
+      .min(1, "Escolha pelo menos um dia de funcionamento."),
   })
   .refine(
     (v) => v.periodicidadeFechamento === "mensal" || v.diaInicioPeriodo <= 7,
     { message: "Dia da semana inválido.", path: ["diaInicioPeriodo"] },
-  );
+  )
+  .refine((v) => v.horaAbertura < v.horaFechamento, {
+    message: "O fechamento tem que ser depois da abertura.",
+    path: ["horaFechamento"],
+  });
 
 export type ConfiguracoesInput = z.infer<typeof configuracoesSchema>;
 
@@ -58,6 +68,10 @@ export async function salvarConfiguracoesAction(
         caixinha_habilitada: c.caixinhaHabilitada,
         periodicidade_fechamento: c.periodicidadeFechamento,
         dia_inicio_periodo: c.diaInicioPeriodo,
+        modo_atendimento: c.modoAtendimento,
+        hora_abertura: c.horaAbertura,
+        hora_fechamento: c.horaFechamento,
+        dias_funcionamento: c.diasFuncionamento,
       },
       { onConflict: "barbearia_id" },
     );
@@ -67,6 +81,7 @@ export async function salvarConfiguracoesAction(
   }
 
   revalidatePath("/atendimento");
+  revalidatePath("/agenda");
   revalidatePath("/configuracoes");
   return { error: null };
 }

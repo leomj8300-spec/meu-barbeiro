@@ -3,16 +3,33 @@
 import { useState, useTransition } from "react";
 import { ToggleField } from "@/components/ToggleField";
 import { salvarConfiguracoesAction } from "@/app/actions/configuracoes";
-import type { BarbeariaConfiguracoes, PeriodicidadeFechamento } from "@/lib/types";
+import type {
+  BarbeariaConfiguracoes,
+  ModoAtendimento,
+  PeriodicidadeFechamento,
+} from "@/lib/types";
 
 const DIAS_SEMANA = [
-  { valor: 1, label: "Segunda-feira" },
-  { valor: 2, label: "Terça-feira" },
-  { valor: 3, label: "Quarta-feira" },
-  { valor: 4, label: "Quinta-feira" },
-  { valor: 5, label: "Sexta-feira" },
-  { valor: 6, label: "Sábado" },
-  { valor: 7, label: "Domingo" },
+  { valor: 1, label: "Segunda-feira", curto: "SEG" },
+  { valor: 2, label: "Terça-feira", curto: "TER" },
+  { valor: 3, label: "Quarta-feira", curto: "QUA" },
+  { valor: 4, label: "Quinta-feira", curto: "QUI" },
+  { valor: 5, label: "Sexta-feira", curto: "SEX" },
+  { valor: 6, label: "Sábado", curto: "SÁB" },
+  { valor: 7, label: "Domingo", curto: "DOM" },
+];
+
+const MODOS: { valor: ModoAtendimento; titulo: string; descricao: string }[] = [
+  {
+    valor: "ordem_chegada",
+    titulo: "Por ordem de chegada",
+    descricao: "Cliente chega, espera a vez e você registra na hora.",
+  },
+  {
+    valor: "agendamento",
+    titulo: "Por agendamento",
+    descricao: "Cliente marca hora. O dia aparece pronto na aba Agenda.",
+  },
 ];
 
 export function ConfiguracoesForm({ configuracoes }: { configuracoes: BarbeariaConfiguracoes }) {
@@ -31,6 +48,14 @@ export function ConfiguracoesForm({ configuracoes }: { configuracoes: BarbeariaC
   const [periodicidadeFechamento, setPeriodicidadeFechamento] =
     useState<PeriodicidadeFechamento>(configuracoes.periodicidadeFechamento);
   const [diaInicioPeriodo, setDiaInicioPeriodo] = useState(configuracoes.diaInicioPeriodo);
+  const [modoAtendimento, setModoAtendimento] = useState<ModoAtendimento>(
+    configuracoes.modoAtendimento,
+  );
+  const [horaAbertura, setHoraAbertura] = useState(configuracoes.horaAbertura);
+  const [horaFechamento, setHoraFechamento] = useState(configuracoes.horaFechamento);
+  const [diasFuncionamento, setDiasFuncionamento] = useState<number[]>(
+    configuracoes.diasFuncionamento,
+  );
 
   const [error, setError] = useState<string | null>(null);
   const [sucesso, setSucesso] = useState(false);
@@ -49,10 +74,20 @@ export function ConfiguracoesForm({ configuracoes }: { configuracoes: BarbeariaC
         caixinhaHabilitada,
         periodicidadeFechamento,
         diaInicioPeriodo,
+        modoAtendimento,
+        horaAbertura,
+        horaFechamento,
+        diasFuncionamento: [...diasFuncionamento].sort((a, b) => a - b),
       });
       if (res.error) setError(res.error);
       else setSucesso(true);
     });
+  }
+
+  function alternarDia(valor: number) {
+    setDiasFuncionamento((atual) =>
+      atual.includes(valor) ? atual.filter((d) => d !== valor) : [...atual, valor],
+    );
   }
 
   return (
@@ -67,6 +102,88 @@ export function ConfiguracoesForm({ configuracoes }: { configuracoes: BarbeariaC
           Configurações salvas.
         </div>
       )}
+
+      <section className="panel p-4">
+        <h2 className="font-mono text-[10px] uppercase tracking-[0.14em] text-text-dim font-semibold mb-3">
+          Como a barbearia atende
+        </h2>
+        <div className="flex flex-col gap-2">
+          {MODOS.map((m) => {
+            const selecionado = modoAtendimento === m.valor;
+            return (
+              <button
+                key={m.valor}
+                type="button"
+                onClick={() => setModoAtendimento(m.valor)}
+                aria-pressed={selecionado}
+                className={`flex items-center gap-3 px-3.5 py-3 rounded-[10px] border text-left transition-colors ${
+                  selecionado ? "border-accent bg-accent-soft" : "border-border bg-panel-2"
+                }`}
+              >
+                <span className="flex-1 min-w-0">
+                  <span className="block text-[13.5px] font-semibold text-text">{m.titulo}</span>
+                  <span className="block text-[11.5px] text-text-dim mt-0.5">{m.descricao}</span>
+                </span>
+                <span
+                  className={`w-4.5 h-4.5 rounded-full border-2 shrink-0 flex items-center justify-center ${
+                    selecionado ? "border-accent" : "border-border"
+                  }`}
+                >
+                  {selecionado && <span className="w-2 h-2 rounded-full bg-accent" />}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {modoAtendimento === "agendamento" && (
+          <div className="mt-4 pt-4 border-t border-border flex flex-col gap-3">
+            <div>
+              <label className="block text-xs text-text-dim mb-1.5">Dias que abre</label>
+              <div className="flex gap-1.5">
+                {DIAS_SEMANA.map((d) => {
+                  const aberto = diasFuncionamento.includes(d.valor);
+                  return (
+                    <button
+                      key={d.valor}
+                      type="button"
+                      onClick={() => alternarDia(d.valor)}
+                      aria-pressed={aberto}
+                      className={`flex-1 rounded-[10px] border py-2 font-mono text-[10px] font-semibold transition-colors ${
+                        aberto
+                          ? "border-accent-border bg-accent-soft text-accent-label"
+                          : "border-border bg-panel-2 text-text-dim"
+                      }`}
+                    >
+                      {d.curto}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <label className="block text-xs text-text-dim mb-1.5">Abre às</label>
+                <input
+                  type="time"
+                  value={horaAbertura}
+                  onChange={(e) => setHoraAbertura(e.target.value)}
+                  className="w-full bg-panel-2 border border-border rounded-[10px] text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
+                />
+              </div>
+              <div className="flex-1">
+                <label className="block text-xs text-text-dim mb-1.5">Fecha às</label>
+                <input
+                  type="time"
+                  value={horaFechamento}
+                  onChange={(e) => setHoraFechamento(e.target.value)}
+                  className="w-full bg-panel-2 border border-border rounded-[10px] text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+      </section>
 
       <section className="panel p-4">
         <h2 className="font-mono text-[10px] uppercase tracking-[0.14em] text-text-dim font-semibold mb-3">

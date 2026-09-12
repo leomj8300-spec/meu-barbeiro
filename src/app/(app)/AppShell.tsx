@@ -12,6 +12,7 @@ import {
   IconHistory,
   IconDoor,
   IconContrast,
+  IconCalendar,
 } from "@/components/icons";
 import { logoutAction } from "@/app/actions/auth";
 import { SuporteChat } from "@/components/SuporteChat";
@@ -57,8 +58,13 @@ export function AppShell({
   const pathname = usePathname();
   const [maisAberto, setMaisAberto] = useState(false);
 
+  // Marcando hora, a primeira aba é a agenda do dia (é o que mais se olha) e o
+  // registro sai de dentro dela — não vira aba a mais, pra barra não apertar.
+  const agendando = config.modoAtendimento === "agendamento";
   const tabs: Tab[] = [
-    { href: "/atendimento", label: "Atender", icon: IconScissors, categoria: "dinheiro" },
+    agendando
+      ? { href: "/agenda", label: "Agenda", icon: IconCalendar, categoria: "dinheiro" }
+      : { href: "/atendimento", label: "Atender", icon: IconScissors, categoria: "dinheiro" },
     { href: "/historico", label: "Histórico", icon: IconHistory, categoria: "neutro" },
   ];
   if (config.fiadoHabilitado) {

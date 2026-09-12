@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { registrarAtendimentoAction } from "@/app/actions/atendimento";
 import { IconUser } from "@/components/icons";
 import { fmtMoeda as fmt } from "@/lib/formato";
@@ -11,13 +12,22 @@ export function AtendimentoForm({
   servicos,
   consumos,
   config,
+  agendamentoId,
+  clienteInicial,
+  servicosIniciais,
 }: {
   servicos: Servico[];
   consumos: Consumo[];
   config: BarbeariaConfiguracoes;
+  /** Presente quando o atendimento veio de um horário marcado. */
+  agendamentoId?: string;
+  clienteInicial?: string;
+  servicosIniciais?: string[];
 }) {
-  const [cliente, setCliente] = useState("");
-  const [servicosSelecionados, setServicosSelecionados] = useState<Set<string>>(new Set());
+  const [cliente, setCliente] = useState(clienteInicial ?? "");
+  const [servicosSelecionados, setServicosSelecionados] = useState<Set<string>>(
+    new Set(servicosIniciais ?? []),
+  );
   const [quantidadesConsumo, setQuantidadesConsumo] = useState<Record<string, number>>({});
   const [precoNegociado, setPrecoNegociado] = useState(false);
   const [valorNegociado, setValorNegociado] = useState("");
@@ -25,6 +35,7 @@ export function AtendimentoForm({
   const [error, setError] = useState<string | null>(null);
   const [sucesso, setSucesso] = useState(false);
   const [pending, startTransition] = useTransition();
+  const router = useRouter();
 
   const valorCalculado = useMemo(() => {
     const totalServicos = servicos
@@ -103,9 +114,13 @@ export function AtendimentoForm({
         valor: valorFinal,
         precoNegociado,
         fiado,
+        agendamentoId,
       });
       if (res.error) {
         setError(res.error);
+      } else if (agendamentoId) {
+        // Veio da agenda: volta pra lá, que é de onde o barbeiro continua o dia.
+        router.push("/agenda");
       } else {
         setSucesso(true);
         resetForm();
