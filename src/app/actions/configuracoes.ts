@@ -28,6 +28,7 @@ const configuracoesSchema = z
     diasFuncionamento: z
       .array(z.number().int().min(1, "Dia inválido.").max(7, "Dia inválido."))
       .min(1, "Escolha pelo menos um dia de funcionamento."),
+    agendamentoOnlineHabilitado: z.boolean(),
   })
   .refine(
     (v) => v.periodicidadeFechamento === "mensal" || v.diaInicioPeriodo <= 7,
@@ -72,6 +73,9 @@ export async function salvarConfiguracoesAction(
         hora_abertura: c.horaAbertura,
         hora_fechamento: c.horaFechamento,
         dias_funcionamento: c.diasFuncionamento,
+        // Publicar a agenda só faz sentido se a barbearia marca hora.
+        agendamento_online_habilitado:
+          c.modoAtendimento === "agendamento" && c.agendamentoOnlineHabilitado,
       },
       { onConflict: "barbearia_id" },
     );

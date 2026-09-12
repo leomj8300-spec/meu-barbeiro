@@ -83,6 +83,9 @@ export function OnboardingWizard() {
         horaAbertura,
         horaFechamento,
         diasFuncionamento: [...diasFuncionamento].sort((a, b) => a - b),
+        // Publicar a agenda na internet é decisão consciente do dono, tomada
+        // depois nas Configurações — não algo que sai ligado do onboarding.
+        agendamentoOnlineHabilitado: false,
       });
       if (res.error) {
         setError(res.error);

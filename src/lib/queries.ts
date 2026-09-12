@@ -490,7 +490,7 @@ export const getConfiguracoes = cache(async function getConfiguracoes(
   const { data, error } = await (await supabaseScoped())
     .from("barbearia_configuracoes")
     .select(
-      "fiado_habilitado, caixinha_habilitada, comissao_habilitada, comissao_padrao_pct, controle_estoque_habilitado, gestao_equipe_habilitada, periodicidade_fechamento, dia_inicio_periodo, modo_atendimento, hora_abertura, hora_fechamento, dias_funcionamento",
+      "fiado_habilitado, caixinha_habilitada, comissao_habilitada, comissao_padrao_pct, controle_estoque_habilitado, gestao_equipe_habilitada, periodicidade_fechamento, dia_inicio_periodo, modo_atendimento, hora_abertura, hora_fechamento, dias_funcionamento, agendamento_online_habilitado",
     )
     .eq("barbearia_id", barbeariaId)
     .maybeSingle();
@@ -511,6 +511,7 @@ export const getConfiguracoes = cache(async function getConfiguracoes(
     horaAbertura: String(data.hora_abertura).slice(0, 5),
     horaFechamento: String(data.hora_fechamento).slice(0, 5),
     diasFuncionamento: data.dias_funcionamento,
+    agendamentoOnlineHabilitado: data.agendamento_online_habilitado,
   };
 });
 
@@ -774,4 +775,17 @@ export async function getAniversariantesDoMes(
   return (data ?? [])
     .filter((c) => Number(c.aniversario.slice(5, 7)) === mes)
     .sort((a, b) => a.aniversario.slice(8, 10).localeCompare(b.aniversario.slice(8, 10)));
+}
+
+/** Dados da própria barbearia — o subdomínio monta o link público de agendamento. */
+export async function getBarbearia(
+  barbeariaId: string,
+): Promise<{ id: string; nome: string; subdominio: string } | null> {
+  const { data, error } = await (await supabaseScoped())
+    .from("barbearias")
+    .select("id, nome, subdominio")
+    .eq("id", barbeariaId)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
 }

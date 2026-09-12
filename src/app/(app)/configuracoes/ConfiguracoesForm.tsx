@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { ToggleField } from "@/components/ToggleField";
 import { salvarConfiguracoesAction } from "@/app/actions/configuracoes";
 import type {
@@ -32,7 +32,21 @@ const MODOS: { valor: ModoAtendimento; titulo: string; descricao: string }[] = [
   },
 ];
 
-export function ConfiguracoesForm({ configuracoes }: { configuracoes: BarbeariaConfiguracoes }) {
+export function ConfiguracoesForm({
+  configuracoes,
+  subdominio,
+}: {
+  configuracoes: BarbeariaConfiguracoes;
+  subdominio: string | null;
+}) {
+  // O domínio muda entre local, preview e produção, e o servidor não sabe
+  // qual o navegador usou. Resolver depois da montagem (em vez de ler window
+  // no render) evita divergir do HTML do servidor e quebrar a hidratação.
+  const [linkPublico, setLinkPublico] = useState<string | null>(null);
+  useEffect(() => {
+    if (subdominio) setLinkPublico(`${window.location.origin}/b/${subdominio}/agendar`);
+  }, [subdominio]);
+
   const [controleEstoqueHabilitado, setControleEstoqueHabilitado] = useState(
     configuracoes.controleEstoqueHabilitado,
   );
@@ -56,6 +70,9 @@ export function ConfiguracoesForm({ configuracoes }: { configuracoes: BarbeariaC
   const [diasFuncionamento, setDiasFuncionamento] = useState<number[]>(
     configuracoes.diasFuncionamento,
   );
+  const [agendamentoOnlineHabilitado, setAgendamentoOnlineHabilitado] = useState(
+    configuracoes.agendamentoOnlineHabilitado,
+  );
 
   const [error, setError] = useState<string | null>(null);
   const [sucesso, setSucesso] = useState(false);
@@ -78,6 +95,7 @@ export function ConfiguracoesForm({ configuracoes }: { configuracoes: BarbeariaC
         horaAbertura,
         horaFechamento,
         diasFuncionamento: [...diasFuncionamento].sort((a, b) => a - b),
+        agendamentoOnlineHabilitado,
       });
       if (res.error) setError(res.error);
       else setSucesso(true);
@@ -180,6 +198,29 @@ export function ConfiguracoesForm({ configuracoes }: { configuracoes: BarbeariaC
                   className="w-full bg-panel-2 border border-border rounded-[10px] text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
                 />
               </div>
+            </div>
+
+            <div className="pt-3 border-t border-border">
+              <ToggleField
+                label="Cliente marca sozinho pela internet"
+                hint="Publica uma página com seus horários livres. Você compartilha o link."
+                value={agendamentoOnlineHabilitado}
+                onChange={setAgendamentoOnlineHabilitado}
+              />
+              {agendamentoOnlineHabilitado && linkPublico && (
+                <div className="mt-2.5 rounded-[10px] border border-border bg-panel-2 px-2.5 py-2">
+                  <p className="text-[10px] uppercase tracking-[0.14em] text-text-dim font-mono font-semibold">
+                    Link pra mandar no WhatsApp
+                  </p>
+                  <p className="font-mono text-[12px] text-accent-label break-all mt-1">
+                    {linkPublico}
+                  </p>
+                  <p className="text-text-dim text-[11px] mt-1.5">
+                    Só vale depois de salvar. Cadastre a duração dos serviços antes, senão
+                    a página não tem como calcular os horários.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         )}

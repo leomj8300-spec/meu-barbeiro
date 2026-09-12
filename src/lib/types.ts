@@ -32,6 +32,8 @@ export interface BarbeariaConfiguracoes {
   horaFechamento: string;
   /** 1=segunda .. 7=domingo */
   diasFuncionamento: number[];
+  /** Publica a agenda pra o cliente marcar sozinho, sem ligar. */
+  agendamentoOnlineHabilitado: boolean;
 }
 
 export const CONFIGURACOES_PADRAO: BarbeariaConfiguracoes = {
@@ -47,4 +49,5 @@ export const CONFIGURACOES_PADRAO: BarbeariaConfiguracoes = {
   horaAbertura: "09:00",
   horaFechamento: "19:00",
   diasFuncionamento: [1, 2, 3, 4, 5, 6],
+  agendamentoOnlineHabilitado: false,
 };
