@@ -14,6 +14,7 @@ import {
   IconContrast,
   IconCalendar,
   IconUser,
+  IconHelp,
 } from "@/components/icons";
 import { logoutAction } from "@/app/actions/auth";
 import { SuporteChat } from "@/components/SuporteChat";
@@ -85,12 +86,14 @@ export function AppShell({
           ...(config.gestaoEquipeHabilitada
             ? [{ href: "/equipe", label: "Equipe", icon: IconUsers }]
             : []),
+          { href: "/relatorios", label: "Relatórios", icon: IconCoin },
           { href: "/configuracoes", label: "Configurações", icon: IconSliders },
         ]
       : []),
     // Ficha do cliente serve aos dois papéis: o barbeiro precisa consultar e
     // cadastrar quem senta na cadeira dele.
     { href: "/clientes", label: "Clientes", icon: IconUser },
+    { href: "/retencao", label: "Retenção", icon: IconHelp },
     { href: "/aparencia", label: "Aparência", icon: IconContrast },
   ];
 

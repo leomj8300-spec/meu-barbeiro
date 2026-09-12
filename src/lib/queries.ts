@@ -490,7 +490,7 @@ export const getConfiguracoes = cache(async function getConfiguracoes(
   const { data, error } = await (await supabaseScoped())
     .from("barbearia_configuracoes")
     .select(
-      "fiado_habilitado, caixinha_habilitada, comissao_habilitada, comissao_padrao_pct, controle_estoque_habilitado, gestao_equipe_habilitada, periodicidade_fechamento, dia_inicio_periodo, modo_atendimento, hora_abertura, hora_fechamento, dias_funcionamento, agendamento_online_habilitado",
+      "fiado_habilitado, caixinha_habilitada, comissao_habilitada, comissao_padrao_pct, controle_estoque_habilitado, gestao_equipe_habilitada, periodicidade_fechamento, dia_inicio_periodo, modo_atendimento, hora_abertura, hora_fechamento, dias_funcionamento, agendamento_online_habilitado, dias_para_retorno",
     )
     .eq("barbearia_id", barbeariaId)
     .maybeSingle();
@@ -512,6 +512,7 @@ export const getConfiguracoes = cache(async function getConfiguracoes(
     horaFechamento: String(data.hora_fechamento).slice(0, 5),
     diasFuncionamento: data.dias_funcionamento,
     agendamentoOnlineHabilitado: data.agendamento_online_habilitado,
+    diasParaRetorno: data.dias_para_retorno,
   };
 });
 
@@ -788,4 +789,247 @@ export async function getBarbearia(
     .maybeSingle();
   if (error) throw error;
   return data;
+}
+
+export interface LembreteAgendamento {
+  id: string;
+  cliente: string;
+  telefone: string | null;
+  inicio: string;
+}
+
+/** Quem tem horário marcado num dia — pra avisar na véspera. */
+export async function getAgendamentosParaLembrar(
+  barbeariaId: string,
+  dia: string,
+  barbeiroId?: string,
+): Promise<LembreteAgendamento[]> {
+  const inicioDia = new Date(`${dia}T00:00:00-03:00`).toISOString();
+  const fimDia = new Date(`${dia}T23:59:59.999-03:00`).toISOString();
+
+  let query = (await supabaseScoped())
+    .from("agendamentos")
+    .select("id, cliente, telefone, inicio, cliente_id")
+    .eq("barbearia_id", barbeariaId)
+    .eq("status", "marcado")
+    .gte("inicio", inicioDia)
+    .lte("inicio", fimDia)
+    .order("inicio");
+
+  if (barbeiroId) query = query.eq("barbeiro_id", barbeiroId);
+
+  const { data, error } = await query;
+  if (error) throw error;
+
+  // O telefone pode ter ficado só na ficha (quando o horário foi marcado no
+  // balcão sem digitar o contato de novo).
+  const semTelefone = (data ?? []).filter((a) => !a.telefone && a.cliente_id);
+  const fichas = new Map<string, string | null>();
+  if (semTelefone.length > 0) {
+    const { data: clientes } = await (await supabaseScoped())
+      .from("clientes")
+      .select("id, telefone")
+      .in("id", semTelefone.map((a) => a.cliente_id as string));
+    for (const c of clientes ?? []) fichas.set(c.id, c.telefone);
+  }
+
+  return (data ?? []).map((a) => ({
+    id: a.id,
+    cliente: a.cliente,
+    telefone: a.telefone ?? (a.cliente_id ? (fichas.get(a.cliente_id) ?? null) : null),
+    inicio: a.inicio,
+  }));
+}
+
+export interface ClienteSumido {
+  id: string;
+  nome: string;
+  telefone: string | null;
+  ultimaVisita: string;
+  diasSemVir: number;
+}
+
+/**
+ * Quem não aparece há mais de `diasParaRetorno` — a lista que vira dinheiro
+ * de volta. Quem nunca foi atendido fica de fora: não sumiu, só nunca veio.
+ */
+export async function getClientesSumidos(
+  barbeariaId: string,
+  diasParaRetorno: number,
+): Promise<ClienteSumido[]> {
+  const db = await supabaseScoped();
+  const [clientes, atendimentos] = await Promise.all([
+    db.from("clientes").select("id, nome, telefone").eq("barbearia_id", barbeariaId),
+    db
+      .from("atendimentos")
+      .select("cliente_id, criado_em")
+      .eq("barbearia_id", barbeariaId)
+      .not("cliente_id", "is", null),
+  ]);
+  if (clientes.error) throw clientes.error;
+  if (atendimentos.error) throw atendimentos.error;
+
+  const ultima = new Map<string, string>();
+  for (const a of atendimentos.data ?? []) {
+    const id = a.cliente_id as string;
+    const atual = ultima.get(id);
+    if (!atual || a.criado_em > atual) ultima.set(id, a.criado_em);
+  }
+
+  const agora = Date.now();
+  return (clientes.data ?? [])
+    .flatMap((c) => {
+      const visita = ultima.get(c.id);
+      if (!visita) return [];
+      const dias = Math.floor((agora - new Date(visita).getTime()) / 86400000);
+      if (dias < diasParaRetorno) return [];
+      return [{ id: c.id, nome: c.nome, telefone: c.telefone, ultimaVisita: visita, diasSemVir: dias }];
+    })
+    .sort((a, b) => b.diasSemVir - a.diasSemVir);
+}
+
+export interface AtendimentoAvaliavel {
+  id: string;
+  cliente: string;
+  telefone: string | null;
+  criadoEm: string;
+  tokenAvaliacao: string;
+  nota: number | null;
+  comentario: string | null;
+}
+
+/** Atendimentos recentes, pra pedir nota de quem ainda não avaliou. */
+export async function getAtendimentosParaAvaliar(
+  barbeariaId: string,
+  barbeiroId?: string,
+): Promise<AtendimentoAvaliavel[]> {
+  let query = (await supabaseScoped())
+    .from("atendimentos")
+    .select("id, cliente, criado_em, token_avaliacao, nota, avaliacao_comentario, cliente_id")
+    .eq("barbearia_id", barbeariaId)
+    .order("criado_em", { ascending: false })
+    .limit(40);
+
+  if (barbeiroId) query = query.eq("barbeiro_id", barbeiroId);
+
+  const { data, error } = await query;
+  if (error) throw error;
+
+  const comFicha = (data ?? []).filter((a) => a.cliente_id);
+  const fichas = new Map<string, string | null>();
+  if (comFicha.length > 0) {
+    const { data: clientes } = await (await supabaseScoped())
+      .from("clientes")
+      .select("id, telefone")
+      .in("id", comFicha.map((a) => a.cliente_id as string));
+    for (const c of clientes ?? []) fichas.set(c.id, c.telefone);
+  }
+
+  return (data ?? []).map((a) => ({
+    id: a.id,
+    cliente: a.cliente,
+    telefone: a.cliente_id ? (fichas.get(a.cliente_id) ?? null) : null,
+    criadoEm: a.criado_em,
+    tokenAvaliacao: a.token_avaliacao,
+    nota: a.nota,
+    comentario: a.avaliacao_comentario,
+  }));
+}
+
+export interface RelatorioGerencial {
+  porDiaDaSemana: { dia: string; qtd: number; total: number }[];
+  porHora: { hora: number; qtd: number }[];
+  porServico: { nome: string; qtd: number; total: number }[];
+  porBarbeiro: { nome: string; qtd: number; total: number }[];
+  totalPeriodo: number;
+  qtdPeriodo: number;
+  ticketMedio: number;
+}
+
+const NOMES_DIA = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+
+/**
+ * Os números que respondem "o que fazer com esse dado": qual dia rende menos
+ * (pra promover), qual horário enche, qual serviço paga as contas e quem
+ * produz mais. Tudo derivado dos atendimentos — nada de tabela nova.
+ *
+ * Só conta atendimento pago: fiado em aberto ainda não é dinheiro.
+ */
+export async function getRelatorioGerencial(
+  barbeariaId: string,
+  desdeDias: number,
+): Promise<RelatorioGerencial> {
+  const desde = new Date(Date.now() - desdeDias * 86400000).toISOString();
+
+  const { data, error } = await (await supabaseScoped())
+    .from("atendimentos")
+    .select(
+      "valor, criado_em, pago, barbeiro:usuarios(nome), atendimento_servicos(nome, preco)",
+    )
+    .eq("barbearia_id", barbeariaId)
+    .eq("pago", true)
+    .gte("criado_em", desde);
+  if (error) throw error;
+
+  const dias = new Map<number, { qtd: number; total: number }>();
+  const horas = new Map<number, number>();
+  const servicos = new Map<string, { qtd: number; total: number }>();
+  const barbeiros = new Map<string, { qtd: number; total: number }>();
+  let totalPeriodo = 0;
+
+  for (const a of data ?? []) {
+    const valor = Number(a.valor);
+    totalPeriodo += valor;
+
+    // Dia e hora na hora da barbearia, não em UTC — senão o atendimento das
+    // 21h de sexta vira sábado no relatório.
+    const local = new Date(
+      new Date(a.criado_em).toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }),
+    );
+
+    const d = local.getDay();
+    const atualDia = dias.get(d) ?? { qtd: 0, total: 0 };
+    dias.set(d, { qtd: atualDia.qtd + 1, total: atualDia.total + valor });
+
+    const h = local.getHours();
+    horas.set(h, (horas.get(h) ?? 0) + 1);
+
+    const barbeiro = a.barbeiro as unknown as { nome: string } | null;
+    const nomeBarbeiro = barbeiro?.nome ?? "—";
+    const atualBarbeiro = barbeiros.get(nomeBarbeiro) ?? { qtd: 0, total: 0 };
+    barbeiros.set(nomeBarbeiro, {
+      qtd: atualBarbeiro.qtd + 1,
+      total: atualBarbeiro.total + valor,
+    });
+
+    for (const s of (a.atendimento_servicos ?? []) as { nome: string; preco: number }[]) {
+      const atualServico = servicos.get(s.nome) ?? { qtd: 0, total: 0 };
+      servicos.set(s.nome, {
+        qtd: atualServico.qtd + 1,
+        total: atualServico.total + Number(s.preco),
+      });
+    }
+  }
+
+  const qtdPeriodo = (data ?? []).length;
+
+  return {
+    porDiaDaSemana: NOMES_DIA.map((dia, i) => ({
+      dia,
+      qtd: dias.get(i)?.qtd ?? 0,
+      total: dias.get(i)?.total ?? 0,
+    })),
+    porHora: Array.from(horas.entries())
+      .map(([hora, qtd]) => ({ hora, qtd }))
+      .sort((a, b) => a.hora - b.hora),
+    porServico: Array.from(servicos.entries())
+      .map(([nome, v]) => ({ nome, ...v }))
+      .sort((a, b) => b.total - a.total),
+    porBarbeiro: Array.from(barbeiros.entries())
+      .map(([nome, v]) => ({ nome, ...v }))
+      .sort((a, b) => b.total - a.total),
+    totalPeriodo,
+    qtdPeriodo,
+    ticketMedio: qtdPeriodo === 0 ? 0 : totalPeriodo / qtdPeriodo,
+  };
 }

@@ -192,6 +192,7 @@ export async function confirmarAcaoAction(
         horaFechamento: atual.horaFechamento,
         diasFuncionamento: atual.diasFuncionamento,
         agendamentoOnlineHabilitado: atual.agendamentoOnlineHabilitado,
+        diasParaRetorno: atual.diasParaRetorno,
       };
       resultado = await salvarConfiguracoesAction(novaConfig);
       break;

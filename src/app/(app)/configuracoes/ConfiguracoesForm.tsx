@@ -73,6 +73,7 @@ export function ConfiguracoesForm({
   const [agendamentoOnlineHabilitado, setAgendamentoOnlineHabilitado] = useState(
     configuracoes.agendamentoOnlineHabilitado,
   );
+  const [diasParaRetorno, setDiasParaRetorno] = useState(String(configuracoes.diasParaRetorno));
 
   const [error, setError] = useState<string | null>(null);
   const [sucesso, setSucesso] = useState(false);
@@ -96,6 +97,7 @@ export function ConfiguracoesForm({
         horaFechamento,
         diasFuncionamento: [...diasFuncionamento].sort((a, b) => a - b),
         agendamentoOnlineHabilitado,
+        diasParaRetorno: Number(diasParaRetorno || 30),
       });
       if (res.error) setError(res.error);
       else setSucesso(true);
@@ -256,6 +258,25 @@ export function ConfiguracoesForm({
             onChange={setCaixinhaHabilitada}
           />
         </div>
+      </section>
+
+      <section className="panel p-4">
+        <h2 className="font-mono text-[10px] uppercase tracking-[0.14em] text-text-dim font-semibold mb-1.5">
+          Retenção
+        </h2>
+        <p className="text-[11.5px] text-text-dim mb-3">
+          Depois de quantos dias sem aparecer o cliente entra na lista de quem chamar de volta.
+        </p>
+        <label className="block text-xs text-text-dim mb-1.5">Dias sem vir</label>
+        <input
+          type="number"
+          min={1}
+          max={365}
+          value={diasParaRetorno}
+          onChange={(e) => setDiasParaRetorno(e.target.value)}
+          onFocus={(e) => e.target.select()}
+          className="w-full bg-panel-2 border border-border rounded-[10px] text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
+        />
       </section>
 
       <section className="panel p-4">

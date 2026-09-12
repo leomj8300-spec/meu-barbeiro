@@ -86,6 +86,7 @@ export function OnboardingWizard() {
         // Publicar a agenda na internet é decisão consciente do dono, tomada
         // depois nas Configurações — não algo que sai ligado do onboarding.
         agendamentoOnlineHabilitado: false,
+        diasParaRetorno: 30,
       });
       if (res.error) {
         setError(res.error);

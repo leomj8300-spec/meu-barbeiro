@@ -34,6 +34,8 @@ export interface BarbeariaConfiguracoes {
   diasFuncionamento: number[];
   /** Publica a agenda pra o cliente marcar sozinho, sem ligar. */
   agendamentoOnlineHabilitado: boolean;
+  /** Dias sem aparecer pra o cliente entrar na lista de quem sumiu. */
+  diasParaRetorno: number;
 }
 
 export const CONFIGURACOES_PADRAO: BarbeariaConfiguracoes = {
@@ -50,4 +52,5 @@ export const CONFIGURACOES_PADRAO: BarbeariaConfiguracoes = {
   horaFechamento: "19:00",
   diasFuncionamento: [1, 2, 3, 4, 5, 6],
   agendamentoOnlineHabilitado: false,
+  diasParaRetorno: 30,
 };

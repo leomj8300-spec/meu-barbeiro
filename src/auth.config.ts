@@ -24,7 +24,8 @@ export const authConfig = {
       // pra conferir como o cliente vê.
       const ehAgendamentoPublico =
         /^\/b\/[^/]+\/agendar$/.test(pathname) ||
-        /^\/b\/[^/]+\/agendado\/[^/]+$/.test(pathname);
+        /^\/b\/[^/]+\/agendado\/[^/]+$/.test(pathname) ||
+        /^\/b\/[^/]+\/avaliar\/[^/]+$/.test(pathname);
       if (ehAgendamentoPublico) return true;
 
       return isLoggedIn;
