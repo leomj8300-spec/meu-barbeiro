@@ -218,6 +218,10 @@ export interface ComissaoPorBarbeiro {
   qtdAtendimentos: number;
   baseComissionavel: number;
   valorComissao: number;
+  /** Adiantamentos ainda não descontados. */
+  valesEmAberto: number;
+  /** Comissão menos vale — o que realmente cai na mão no acerto. */
+  aPagar: number;
 }
 
 /**
@@ -271,7 +275,24 @@ export async function getComissoes(
       qtdAtendimentos: 0,
       baseComissionavel: 0,
       valorComissao: 0,
+      valesEmAberto: 0,
+      aPagar: 0,
     });
+  }
+
+  // Vale é dinheiro que o barbeiro já pegou: precisa sair da comissão no
+  // acerto, senão a barbearia paga duas vezes pelo mesmo trabalho.
+  let valesQuery = (await supabaseScoped())
+    .from("vales")
+    .select("barbeiro_id, valor")
+    .eq("barbearia_id", barbeariaId)
+    .eq("em_aberto", true);
+  if (barbeiroId) valesQuery = valesQuery.eq("barbeiro_id", barbeiroId);
+  const { data: vales } = await valesQuery;
+
+  for (const v of vales ?? []) {
+    const acumulado = resultado.get(v.barbeiro_id);
+    if (acumulado) acumulado.valesEmAberto += Number(v.valor);
   }
 
   for (const a of atendimentos ?? []) {
@@ -293,6 +314,10 @@ export async function getComissoes(
     acumulado.qtdAtendimentos += 1;
     acumulado.baseComissionavel += baseServicosComissionaveis * proporcao;
     acumulado.valorComissao += (baseServicosComissionaveis * proporcao * acumulado.comissaoPct) / 100;
+  }
+
+  for (const c of resultado.values()) {
+    c.aPagar = Math.max(0, c.valorComissao - c.valesEmAberto);
   }
 
   return Array.from(resultado.values()).sort((a, b) => b.valorComissao - a.valorComissao);
@@ -1031,5 +1056,153 @@ export async function getRelatorioGerencial(
     totalPeriodo,
     qtdPeriodo,
     ticketMedio: qtdPeriodo === 0 ? 0 : totalPeriodo / qtdPeriodo,
+  };
+}
+
+export interface Conta {
+  id: string;
+  tipo: "pagar" | "receber";
+  descricao: string;
+  valor: number;
+  vencimento: string;
+  pago: boolean;
+}
+
+export async function getContas(barbeariaId: string): Promise<Conta[]> {
+  const { data, error } = await (await supabaseScoped())
+    .from("contas")
+    .select("id, tipo, descricao, valor, vencimento, pago")
+    .eq("barbearia_id", barbeariaId)
+    .order("vencimento");
+  if (error) throw error;
+  return (data ?? []).map((c) => ({ ...c, valor: Number(c.valor) }));
+}
+
+export interface FormaPagamento {
+  id: string;
+  nome: string;
+  taxaPct: number;
+  ativa: boolean;
+}
+
+export async function getFormasPagamento(
+  barbeariaId: string,
+  somenteAtivas = false,
+): Promise<FormaPagamento[]> {
+  let query = (await supabaseScoped())
+    .from("formas_pagamento")
+    .select("id, nome, taxa_pct, ativa")
+    .eq("barbearia_id", barbeariaId)
+    .order("nome");
+  if (somenteAtivas) query = query.eq("ativa", true);
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return (data ?? []).map((f) => ({
+    id: f.id,
+    nome: f.nome,
+    taxaPct: Number(f.taxa_pct),
+    ativa: f.ativa,
+  }));
+}
+
+export interface Vale {
+  id: string;
+  barbeiroId: string;
+  barbeiroNome: string;
+  valor: number;
+  descricao: string | null;
+  emAberto: boolean;
+  criadoEm: string;
+}
+
+/** Vales do período. Dono vê de todos; barbeiro só os dele (regra do RLS). */
+export async function getVales(
+  barbeariaId: string,
+  barbeiroId?: string,
+): Promise<Vale[]> {
+  let query = (await supabaseScoped())
+    .from("vales")
+    .select("id, barbeiro_id, valor, descricao, em_aberto, criado_em, barbeiro:usuarios(nome)")
+    .eq("barbearia_id", barbeariaId)
+    .order("criado_em", { ascending: false });
+  if (barbeiroId) query = query.eq("barbeiro_id", barbeiroId);
+
+  const { data, error } = await query;
+  if (error) throw error;
+
+  return (data ?? []).map((v) => {
+    const barbeiro = v.barbeiro as unknown as { nome: string } | null;
+    return {
+      id: v.id,
+      barbeiroId: v.barbeiro_id,
+      barbeiroNome: barbeiro?.nome ?? "—",
+      valor: Number(v.valor),
+      descricao: v.descricao,
+      emAberto: v.em_aberto,
+      criadoEm: v.criado_em,
+    };
+  });
+}
+
+export interface ResumoFinanceiro {
+  /** Faturamento bruto pago no período. */
+  bruto: number;
+  /** Quanto a maquininha levou. */
+  taxas: number;
+  /** Contas a pagar ainda em aberto. */
+  aPagar: number;
+  /** Contas a receber ainda em aberto. */
+  aReceber: number;
+  /** Vales adiantados que ainda não foram descontados. */
+  valesEmAberto: number;
+  /** Bruto menos taxa e menos despesa em aberto — o que de fato sobra. */
+  liquido: number;
+}
+
+export async function getResumoFinanceiro(
+  barbeariaId: string,
+  desdeDias: number,
+): Promise<ResumoFinanceiro> {
+  const desde = new Date(Date.now() - desdeDias * 86400000).toISOString();
+  const db = await supabaseScoped();
+
+  const [atendimentos, contas, vales] = await Promise.all([
+    db
+      .from("atendimentos")
+      .select("valor, taxa_pct")
+      .eq("barbearia_id", barbeariaId)
+      .eq("pago", true)
+      .gte("criado_em", desde),
+    db.from("contas").select("tipo, valor, pago").eq("barbearia_id", barbeariaId).eq("pago", false),
+    db.from("vales").select("valor").eq("barbearia_id", barbeariaId).eq("em_aberto", true),
+  ]);
+  if (atendimentos.error) throw atendimentos.error;
+  if (contas.error) throw contas.error;
+  if (vales.error) throw vales.error;
+
+  let bruto = 0;
+  let taxas = 0;
+  for (const a of atendimentos.data ?? []) {
+    const valor = Number(a.valor);
+    bruto += valor;
+    taxas += valor * (Number(a.taxa_pct) / 100);
+  }
+
+  const aPagar = (contas.data ?? [])
+    .filter((c) => c.tipo === "pagar")
+    .reduce((s, c) => s + Number(c.valor), 0);
+  const aReceber = (contas.data ?? [])
+    .filter((c) => c.tipo === "receber")
+    .reduce((s, c) => s + Number(c.valor), 0);
+  const valesEmAberto = (vales.data ?? []).reduce((s, v) => s + Number(v.valor), 0);
+
+  return {
+    bruto,
+    taxas,
+    aPagar,
+    aReceber,
+    valesEmAberto,
+    liquido: bruto - taxas - aPagar,
   };
 }

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { registrarAtendimentoAction } from "@/app/actions/atendimento";
 import { IconUser } from "@/components/icons";
 import { fmtMoeda as fmt } from "@/lib/formato";
-import type { Servico, Consumo } from "@/lib/queries";
+import type { Servico, Consumo, FormaPagamento } from "@/lib/queries";
 import type { BarbeariaConfiguracoes } from "@/lib/types";
 
 export function AtendimentoForm({
@@ -16,6 +16,7 @@ export function AtendimentoForm({
   clienteInicial,
   servicosIniciais,
   nomesDeClientes = [],
+  formasPagamento = [],
 }: {
   servicos: Servico[];
   consumos: Consumo[];
@@ -25,6 +26,7 @@ export function AtendimentoForm({
   clienteInicial?: string;
   servicosIniciais?: string[];
   nomesDeClientes?: string[];
+  formasPagamento?: FormaPagamento[];
 }) {
   const [cliente, setCliente] = useState(clienteInicial ?? "");
   const [servicosSelecionados, setServicosSelecionados] = useState<Set<string>>(
@@ -34,6 +36,7 @@ export function AtendimentoForm({
   const [precoNegociado, setPrecoNegociado] = useState(false);
   const [valorNegociado, setValorNegociado] = useState("");
   const [fiado, setFiado] = useState(false);
+  const [formaPagamentoId, setFormaPagamentoId] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [sucesso, setSucesso] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -78,6 +81,7 @@ export function AtendimentoForm({
     setPrecoNegociado(false);
     setValorNegociado("");
     setFiado(false);
+    setFormaPagamentoId("");
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -117,6 +121,7 @@ export function AtendimentoForm({
         precoNegociado,
         fiado,
         agendamentoId,
+        formaPagamentoId: fiado ? undefined : formaPagamentoId || undefined,
       });
       if (res.error) {
         setError(res.error);
@@ -266,6 +271,23 @@ export function AtendimentoForm({
         <h2 className="font-mono text-[10px] uppercase tracking-[0.14em] text-text-dim mb-3">
           Pagamento
         </h2>
+        {/* Só aparece quando não é fiado: fiado ainda não foi pago, então não
+            tem forma de pagamento nem taxa de maquininha. */}
+        {formasPagamento.length > 0 && !fiado && (
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {formasPagamento.map((f) => (
+              <button
+                key={f.id}
+                type="button"
+                onClick={() => setFormaPagamentoId(formaPagamentoId === f.id ? "" : f.id)}
+                className={`chip ${formaPagamentoId === f.id ? "chip-on" : "chip-off"}`}
+              >
+                {f.nome}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div className="flex flex-wrap gap-2 mb-3">
           <button
             type="button"

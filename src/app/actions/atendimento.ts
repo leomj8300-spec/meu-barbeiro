@@ -32,6 +32,7 @@ const registrarAtendimentoSchema = z.object({
   fiado: z.boolean(),
   /** Presente quando o atendimento nasceu de um horário marcado. */
   agendamentoId: z.string().uuid().optional(),
+  formaPagamentoId: z.string().uuid().optional(),
 });
 
 export type RegistrarAtendimentoInput = z.infer<typeof registrarAtendimentoSchema>;
@@ -89,13 +90,33 @@ export async function registrarAtendimentoAction(
   }
 
   // A carteira de clientes se forma sozinha do uso normal: o nome digitado
-  // vira ficha se ainda não existir. O RPC não recebe cliente_id, então o
-  // vínculo é feito logo depois — se falhar, o atendimento continua válido.
+  // vira ficha se ainda não existir. O RPC não recebe esses campos, então o
+  // complemento é feito logo depois — se falhar, o atendimento continua
+  // válido (o dinheiro já está registrado, que é o que não pode se perder).
   const clienteId = await resolverClienteId(session.user.barbeariaId, cliente);
-  if (clienteId) {
+
+  // A taxa é travada aqui, igual o preço do serviço: se a barbearia
+  // renegociar a maquininha depois, o histórico não pode mudar.
+  let taxaPct = 0;
+  if (parsed.data.formaPagamentoId) {
+    const { data: forma } = await (await supabaseScoped())
+      .from("formas_pagamento")
+      .select("taxa_pct")
+      .eq("id", parsed.data.formaPagamentoId)
+      .eq("barbearia_id", session.user.barbeariaId)
+      .maybeSingle();
+    taxaPct = forma ? Number(forma.taxa_pct) : 0;
+  }
+
+  if (clienteId || parsed.data.formaPagamentoId) {
     await (await supabaseScoped())
       .from("atendimentos")
-      .update({ cliente_id: clienteId })
+      .update({
+        ...(clienteId ? { cliente_id: clienteId } : {}),
+        ...(parsed.data.formaPagamentoId
+          ? { forma_pagamento_id: parsed.data.formaPagamentoId, taxa_pct: taxaPct }
+          : {}),
+      })
       .eq("id", atendimentoId)
       .eq("barbearia_id", session.user.barbeariaId);
   }

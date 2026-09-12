@@ -6,6 +6,7 @@ import {
   getConfiguracoes,
   getAgendamento,
   getClientes,
+  getFormasPagamento,
 } from "@/lib/queries";
 import { CONFIGURACOES_PADRAO } from "@/lib/types";
 import { fmtHora } from "@/lib/formato";
@@ -20,11 +21,12 @@ export default async function AtendimentoPage({ searchParams }: PageProps<"/aten
   // As buscas não dependem uma da outra — dispara tudo junto em vez de
   // esperar configuracoes pra só então buscar consumos (economiza uma
   // viagem de rede a cada troca de aba).
-  const [configuracoes, servicos, todosConsumos, clientes] = await Promise.all([
+  const [configuracoes, servicos, todosConsumos, clientes, formasPagamento] = await Promise.all([
     getConfiguracoes(session.user.barbeariaId),
     getServicos(session.user.barbeariaId),
     getConsumos(session.user.barbeariaId),
     getClientes(session.user.barbeariaId),
+    getFormasPagamento(session.user.barbeariaId, true),
   ]);
   if (!configuracoes) {
     if (session.user.papel === "dono") redirect("/onboarding");
@@ -64,6 +66,7 @@ export default async function AtendimentoPage({ searchParams }: PageProps<"/aten
         clienteInicial={agendamento?.cliente}
         servicosIniciais={agendamento?.servicos.map((s) => s.servicoId)}
         nomesDeClientes={clientes.map((c) => c.nome)}
+        formasPagamento={formasPagamento}
       />
     </>
   );

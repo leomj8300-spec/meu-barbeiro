@@ -297,7 +297,23 @@ function ComissaoSection({ ehDono, comissoes }: { ehDono: boolean; comissoes: Co
             {c.qtdAtendimentos} atendimento{c.qtdAtendimentos !== 1 ? "s" : ""} · base comissionável{" "}
             {fmt(c.baseComissionavel)}
           </p>
-          <p className="font-mono text-2xl font-bold text-accent-label">{fmt(c.valorComissao)}</p>
+          {c.valesEmAberto > 0 ? (
+            <>
+              <p className="font-mono text-[13px] text-text-dim line-through">
+                {fmt(c.valorComissao)}
+              </p>
+              <p className="text-warn text-[11.5px] mt-0.5">
+                − {fmt(c.valesEmAberto)} de vale já adiantado
+              </p>
+              <p className="font-mono text-2xl font-bold text-accent-label mt-1">
+                {fmt(c.aPagar)}
+              </p>
+            </>
+          ) : (
+            <p className="font-mono text-2xl font-bold text-accent-label">
+              {fmt(c.valorComissao)}
+            </p>
+          )}
         </div>
       ))}
     </div>

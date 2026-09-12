@@ -87,6 +87,7 @@ export function AppShell({
             ? [{ href: "/equipe", label: "Equipe", icon: IconUsers }]
             : []),
           { href: "/relatorios", label: "Relatórios", icon: IconCoin },
+          { href: "/financeiro", label: "Financeiro", icon: IconCoin },
           { href: "/configuracoes", label: "Configurações", icon: IconSliders },
         ]
       : []),
