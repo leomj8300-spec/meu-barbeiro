@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import {
   getAgendamentosDoDia,
   getAtendentes,
+  getClientes,
   getConfiguracoes,
   getServicos,
 } from "@/lib/queries";
@@ -29,7 +30,7 @@ export default async function AgendaPage({
   const dia = diaParam && /^\d{4}-\d{2}-\d{2}$/.test(diaParam) ? diaParam : chaveDia(new Date());
 
   const ehDono = session.user.papel === "dono";
-  const [agendamentos, servicos, atendentes] = await Promise.all([
+  const [agendamentos, servicos, atendentes, clientes] = await Promise.all([
     getAgendamentosDoDia(
       session.user.barbeariaId,
       dia,
@@ -39,6 +40,7 @@ export default async function AgendaPage({
     ehDono && configuracoes.gestaoEquipeHabilitada
       ? getAtendentes(session.user.barbeariaId)
       : Promise.resolve([]),
+    getClientes(session.user.barbeariaId),
   ]);
 
   return (
@@ -55,6 +57,7 @@ export default async function AgendaPage({
         atendentes={atendentes}
         usuarioId={session.user.id}
         config={configuracoes}
+        nomesDeClientes={clientes.map((c) => c.nome)}
       />
     </>
   );

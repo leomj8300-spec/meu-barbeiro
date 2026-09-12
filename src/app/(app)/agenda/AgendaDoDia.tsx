@@ -39,6 +39,7 @@ export function AgendaDoDia({
   atendentes,
   usuarioId,
   config,
+  nomesDeClientes,
 }: {
   dia: string;
   agendamentos: Agendamento[];
@@ -46,6 +47,7 @@ export function AgendaDoDia({
   atendentes: { id: string; nome: string }[];
   usuarioId: string;
   config: BarbeariaConfiguracoes;
+  nomesDeClientes: string[];
 }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -230,10 +232,17 @@ export function AgendaDoDia({
           <input
             type="text"
             placeholder="Nome do cliente"
+            list="clientes-da-agenda"
             value={cliente}
             onChange={(e) => setCliente(e.target.value)}
             className="w-full bg-panel-2 border border-border rounded-[10px] text-text px-2.5 py-2 text-[13.5px] focus:outline-none focus:border-accent"
           />
+          {/* Reconhece quem já é da casa em vez de abrir ficha nova. */}
+          <datalist id="clientes-da-agenda">
+            {nomesDeClientes.map((nome) => (
+              <option key={nome} value={nome} />
+            ))}
+          </datalist>
 
           <div className="flex gap-2">
             <input

@@ -15,6 +15,7 @@ export function AtendimentoForm({
   agendamentoId,
   clienteInicial,
   servicosIniciais,
+  nomesDeClientes = [],
 }: {
   servicos: Servico[];
   consumos: Consumo[];
@@ -23,6 +24,7 @@ export function AtendimentoForm({
   agendamentoId?: string;
   clienteInicial?: string;
   servicosIniciais?: string[];
+  nomesDeClientes?: string[];
 }) {
   const [cliente, setCliente] = useState(clienteInicial ?? "");
   const [servicosSelecionados, setServicosSelecionados] = useState<Set<string>>(
@@ -156,9 +158,17 @@ export function AtendimentoForm({
             onChange={(e) => setCliente(e.target.value)}
             type="text"
             required
+            list="clientes-cadastrados"
             placeholder="Nome do cliente"
             className="flex-1 min-w-0 bg-transparent text-text text-[15px] focus:outline-none"
           />
+          {/* Reconhece quem já veio antes em vez de virar uma ficha nova por
+              causa de um acento ou apelido diferente. */}
+          <datalist id="clientes-cadastrados">
+            {nomesDeClientes.map((nome) => (
+              <option key={nome} value={nome} />
+            ))}
+          </datalist>
         </div>
       </div>
 

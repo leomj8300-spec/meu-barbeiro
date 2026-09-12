@@ -7,6 +7,7 @@ import { supabaseScoped } from "@/lib/supabase/scoped";
 import { getConfiguracoes } from "@/lib/queries";
 import { CONFIGURACOES_PADRAO } from "@/lib/types";
 import { registrarErro } from "@/lib/logs";
+import { resolverClienteId } from "@/lib/clientes";
 
 const itemServicoSchema = z.object({
   servico_id: z.string().uuid(),
@@ -85,6 +86,18 @@ export async function registrarAtendimentoAction(
       mensagem: error.message,
     });
     return { error: "Não foi possível registrar o atendimento." };
+  }
+
+  // A carteira de clientes se forma sozinha do uso normal: o nome digitado
+  // vira ficha se ainda não existir. O RPC não recebe cliente_id, então o
+  // vínculo é feito logo depois — se falhar, o atendimento continua válido.
+  const clienteId = await resolverClienteId(session.user.barbeariaId, cliente);
+  if (clienteId) {
+    await (await supabaseScoped())
+      .from("atendimentos")
+      .update({ cliente_id: clienteId })
+      .eq("id", atendimentoId)
+      .eq("barbearia_id", session.user.barbeariaId);
   }
 
   if (parsed.data.agendamentoId) {

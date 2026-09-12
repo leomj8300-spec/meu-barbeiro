@@ -13,6 +13,7 @@ import {
   IconDoor,
   IconContrast,
   IconCalendar,
+  IconUser,
 } from "@/components/icons";
 import { logoutAction } from "@/app/actions/auth";
 import { SuporteChat } from "@/components/SuporteChat";
@@ -87,6 +88,9 @@ export function AppShell({
           { href: "/configuracoes", label: "Configurações", icon: IconSliders },
         ]
       : []),
+    // Ficha do cliente serve aos dois papéis: o barbeiro precisa consultar e
+    // cadastrar quem senta na cadeira dele.
+    { href: "/clientes", label: "Clientes", icon: IconUser },
     { href: "/aparencia", label: "Aparência", icon: IconContrast },
   ];
 

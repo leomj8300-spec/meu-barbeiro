@@ -692,3 +692,86 @@ export async function getAtendentes(
   if (error) throw error;
   return data ?? [];
 }
+
+export interface Cliente {
+  id: string;
+  nome: string;
+  telefone: string | null;
+  aniversario: string | null;
+  observacao: string | null;
+}
+
+export interface ClienteComResumo extends Cliente {
+  visitas: number;
+  totalGasto: number;
+  ultimaVisita: string | null;
+}
+
+export async function getClientes(barbeariaId: string): Promise<Cliente[]> {
+  const { data, error } = await (await supabaseScoped())
+    .from("clientes")
+    .select("id, nome, telefone, aniversario, observacao")
+    .eq("barbearia_id", barbeariaId)
+    .order("nome");
+  if (error) throw error;
+  return data ?? [];
+}
+
+/**
+ * Clientes com o resumo que interessa no balcão: quantas vezes veio, quanto
+ * já deixou na casa e quando foi a última vez. Só conta atendimento pago —
+ * fiado em aberto ainda não é dinheiro na mão.
+ */
+export async function getClientesComResumo(
+  barbeariaId: string,
+): Promise<ClienteComResumo[]> {
+  const db = await supabaseScoped();
+  const [clientes, atendimentos] = await Promise.all([
+    getClientes(barbeariaId),
+    db
+      .from("atendimentos")
+      .select("cliente_id, valor, pago, criado_em")
+      .eq("barbearia_id", barbeariaId)
+      .not("cliente_id", "is", null),
+  ]);
+  if (atendimentos.error) throw atendimentos.error;
+
+  const resumo = new Map<string, { visitas: number; total: number; ultima: string | null }>();
+  for (const a of atendimentos.data ?? []) {
+    const id = a.cliente_id as string;
+    const atual = resumo.get(id) ?? { visitas: 0, total: 0, ultima: null };
+    atual.visitas += 1;
+    if (a.pago) atual.total += Number(a.valor);
+    if (!atual.ultima || a.criado_em > atual.ultima) atual.ultima = a.criado_em;
+    resumo.set(id, atual);
+  }
+
+  return clientes.map((c) => {
+    const r = resumo.get(c.id);
+    return {
+      ...c,
+      visitas: r?.visitas ?? 0,
+      totalGasto: r?.total ?? 0,
+      ultimaVisita: r?.ultima ?? null,
+    };
+  });
+}
+
+/** Aniversariantes de um mês (1-12), ordenados pelo dia. */
+export async function getAniversariantesDoMes(
+  barbeariaId: string,
+  mes: number,
+): Promise<Cliente[]> {
+  const { data, error } = await (await supabaseScoped())
+    .from("clientes")
+    .select("id, nome, telefone, aniversario, observacao")
+    .eq("barbearia_id", barbeariaId)
+    .not("aniversario", "is", null);
+  if (error) throw error;
+
+  // Filtrar por mês no banco exigiria extract() via RPC; a base de clientes de
+  // uma barbearia cabe tranquilamente em memória.
+  return (data ?? [])
+    .filter((c) => Number(c.aniversario.slice(5, 7)) === mes)
+    .sort((a, b) => a.aniversario.slice(8, 10).localeCompare(b.aniversario.slice(8, 10)));
+}

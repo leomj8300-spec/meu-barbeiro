@@ -1,6 +1,12 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { getServicos, getConsumos, getConfiguracoes, getAgendamento } from "@/lib/queries";
+import {
+  getServicos,
+  getConsumos,
+  getConfiguracoes,
+  getAgendamento,
+  getClientes,
+} from "@/lib/queries";
 import { CONFIGURACOES_PADRAO } from "@/lib/types";
 import { fmtHora } from "@/lib/formato";
 import { PageHeading } from "@/components/PageHeading";
@@ -11,13 +17,14 @@ export default async function AtendimentoPage({ searchParams }: PageProps<"/aten
   const session = await auth();
   if (!session?.user) return null; // proxy.ts já redireciona pra /login
 
-  // As três buscas não dependem uma da outra — dispara tudo junto em vez de
+  // As buscas não dependem uma da outra — dispara tudo junto em vez de
   // esperar configuracoes pra só então buscar consumos (economiza uma
   // viagem de rede a cada troca de aba).
-  const [configuracoes, servicos, todosConsumos] = await Promise.all([
+  const [configuracoes, servicos, todosConsumos, clientes] = await Promise.all([
     getConfiguracoes(session.user.barbeariaId),
     getServicos(session.user.barbeariaId),
     getConsumos(session.user.barbeariaId),
+    getClientes(session.user.barbeariaId),
   ]);
   if (!configuracoes) {
     if (session.user.papel === "dono") redirect("/onboarding");
@@ -56,6 +63,7 @@ export default async function AtendimentoPage({ searchParams }: PageProps<"/aten
         agendamentoId={agendamento?.id}
         clienteInicial={agendamento?.cliente}
         servicosIniciais={agendamento?.servicos.map((s) => s.servicoId)}
+        nomesDeClientes={clientes.map((c) => c.nome)}
       />
     </>
   );

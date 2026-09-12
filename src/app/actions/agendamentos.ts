@@ -6,6 +6,7 @@ import { auth } from "@/auth";
 import { supabaseScoped } from "@/lib/supabase/scoped";
 import { getConfiguracoes, getServicos } from "@/lib/queries";
 import { CONFIGURACOES_PADRAO } from "@/lib/types";
+import { resolverClienteId } from "@/lib/clientes";
 
 const agendamentoSchema = z.object({
   cliente: z.string().trim().min(1, "Informe o nome do cliente."),
@@ -158,6 +159,9 @@ async function criar(
     }
   }
 
+  // Marcar horário também alimenta a carteira: quem marca vira ficha.
+  const clienteId = await resolverClienteId(barbeariaId, d.cliente);
+
   const db = await supabaseScoped();
   const { data: criado, error } = await db
     .from("agendamentos")
@@ -165,6 +169,7 @@ async function criar(
       barbearia_id: barbeariaId,
       barbeiro_id: barbeiroId,
       cliente: d.cliente,
+      cliente_id: clienteId,
       telefone: d.telefone || null,
       inicio: inicio.toISOString(),
       duracao_min: duracaoMin,
